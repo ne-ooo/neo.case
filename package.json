@@ -1,0 +1,75 @@
+{
+  "name": "@lpm.dev/neo.case",
+  "version": "1.0.0",
+  "description": "Modern, comprehensive case conversion library - zero dependencies, TypeScript-first, tree-shakeable. Convert between camelCase, snake_case, kebab-case, and 7 more cases. 100% backward compatible with camelcase package.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    ".lpm",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bench": "vitest bench"
+  },
+  "keywords": [
+    "case",
+    "camelcase",
+    "camel-case",
+    "pascalcase",
+    "pascal-case",
+    "snakecase",
+    "snake-case",
+    "kebabcase",
+    "kebab-case",
+    "constantcase",
+    "constant-case",
+    "dotcase",
+    "pathcase",
+    "sentencecase",
+    "titlecase",
+    "traincase",
+    "convert",
+    "transform",
+    "string",
+    "text",
+    "typescript",
+    "zero-dependency",
+    "tree-shakeable"
+  ],
+  "author": "neo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ne-ooo/neo.case"
+  },
+  "bugs": {
+    "url": "https://github.com/ne-ooo/neo.case/issues"
+  },
+  "homepage": "https://github.com/ne-ooo/neo.case#readme",
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "camelcase": "^9.0.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.3.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
