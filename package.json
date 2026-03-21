@@ -1,6 +1,6 @@
 {
   "name": "@lpm.dev/neo.case",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Modern, comprehensive case conversion library - zero dependencies, TypeScript-first, tree-shakeable. Convert between camelCase, snake_case, kebab-case, and 7 more cases. 100% backward compatible with camelcase package.",
   "type": "module",
   "sideEffects": false,
@@ -18,6 +18,7 @@
     "dist",
     ".lpm",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
