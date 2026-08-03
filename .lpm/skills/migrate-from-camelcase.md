@@ -14,8 +14,8 @@ globs:
 | Aspect | camelcase | neo.case |
 |--------|-----------|----------|
 | Case functions | 2 (camelCase, pascalCase) | 10 (+ snakeCase, kebabCase, constantCase, dotCase, pathCase, sentenceCase, titleCase, trainCase) |
-| Bundle (all cases) | ~2KB for 2 cases | ~1.33KB for 10 cases |
-| Bundle (single case) | ~2KB (no tree-shaking) | ~300-400 bytes (tree-shakeable) |
+| Full available API | ~0.91KB for camelCase | ~1.98KB for 10 cases plus utilities |
+| Bundle (camel only) | ~0.91KB gzipped | ~0.98KB gzipped |
 | Dependencies | Zero | Zero |
 | API compatibility | — | 100% backward compatible |
 | TypeScript | Native | Native |
@@ -28,10 +28,10 @@ globs:
 import camelCase from 'camelcase'
 
 // After
-import { camelCase } from '@lpm.dev/neo.case'
+import camelCase from '@lpm.dev/neo.case'
 ```
 
-Note: `camelcase` uses a default export, neo.case uses a named export.
+The default export is compatible with `camelcase`. A named `camelCase` export is also available.
 
 ## Step 2: All Existing Code Works As-Is
 
@@ -104,25 +104,19 @@ import { pascalCase } from '@lpm.dev/neo.case'
 const name = pascalCase('foo-bar')
 ```
 
-## Gotchas to Be Aware Of
+## Option Compatibility
 
-### Options that exist in types but aren't implemented
-
-Two options from the `camelcase` package are accepted by TypeScript but have no effect at runtime:
+All `camelcase@9` options are implemented with matching behavior:
 
 ```typescript
-// capitalizeAfterNumber — silently ignored
-camelCase('foo2bar', { capitalizeAfterNumber: false })
-// Returns 'foo2Bar' regardless — numbers always create word boundaries
-
-// preserveConsecutiveUppercase — silently ignored
 camelCase('foo-BAR', { preserveConsecutiveUppercase: true })
-// Returns 'fooBar' regardless — consecutive uppercase is always lowered
+// 'fooBAR'
+
+camelCase('foo2bar', { capitalizeAfterNumber: false })
+// 'foo2bar'
 ```
 
-If your code relies on either of these options having an effect, the behavior will differ from the original `camelcase` package.
-
-### Number boundary behavior is identical
+### Number boundary behavior
 
 Both `camelcase` and neo.case treat numbers as word boundaries:
 
@@ -131,14 +125,13 @@ camelCase('foo2bar')      // 'foo2Bar' (same in both)
 camelCase('sha256hash')   // 'sha256Hash' (same in both)
 ```
 
-This is inherited behavior, not a migration issue.
+Set `capitalizeAfterNumber: false` when letters after numbers should preserve their original case.
 
 ## Migration Checklist
 
-- [ ] Replace `import camelCase from 'camelcase'` with `import { camelCase } from '@lpm.dev/neo.case'` (default → named export)
+- [ ] Replace the package specifier in `import camelCase from 'camelcase'` with `@lpm.dev/neo.case`
 - [ ] Replace `camelCase(x, { pascalCase: true })` with `pascalCase(x)` (optional, cleaner)
-- [ ] Check for `preserveConsecutiveUppercase: true` usage — it's silently ignored in neo.case
-- [ ] Check for `capitalizeAfterNumber: false` usage — it's silently ignored in neo.case
+- [ ] Keep existing `preserveConsecutiveUppercase` and `capitalizeAfterNumber` options unchanged
 - [ ] Remove `camelcase` from dependencies
 - [ ] Add `@lpm.dev/neo.case` to dependencies
 - [ ] Consider using additional case functions (`snakeCase`, `kebabCase`, etc.) where you had manual implementations

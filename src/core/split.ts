@@ -1,77 +1,189 @@
-import {
-  SEPARATORS,
-  UPPERCASE_LOWERCASE,
-  LOWERCASE_UPPERCASE,
-  LETTER_NUMBER,
-  NUMBER_LETTER,
-  LEADING_SPECIAL,
-  TRAILING_SPECIAL,
-} from '../utils/constants.js'
+const LETTER = 1 << 0
+const UPPERCASE = 1 << 1
+const LOWERCASE = 1 << 2
+const NUMBER = 1 << 3
+const SEPARATOR = 1 << 4
+
+const UNICODE_LETTER = /\p{L}/u
+const UNICODE_UPPERCASE = /\p{Lu}/u
+const UNICODE_LOWERCASE = /\p{Ll}/u
+const UNICODE_NUMBER = /\p{N}/u
+
+function getCharacterWidth(input: string, index: number): number {
+  const codeUnit = input.charCodeAt(index)
+
+  return codeUnit >= 0xD800
+    && codeUnit <= 0xDBFF
+    && index + 1 < input.length
+    && input.charCodeAt(index + 1) >= 0xDC00
+    && input.charCodeAt(index + 1) <= 0xDFFF
+    ? 2
+    : 1
+}
+
+function getCharacterType(input: string, index: number): number {
+  if (index >= input.length) {
+    return 0
+  }
+
+  const codeUnit = input.charCodeAt(index)
+
+  // ASCII fast path covers identifiers and every supported separator.
+  if (codeUnit <= 0x7F) {
+    if (
+      codeUnit === 0x20 // space
+      || codeUnit === 0x2D // -
+      || codeUnit === 0x2E // .
+      || codeUnit === 0x2F // /
+      || codeUnit === 0x5F // _
+    ) {
+      return SEPARATOR
+    }
+
+    if (codeUnit >= 0x41 && codeUnit <= 0x5A) {
+      return LETTER | UPPERCASE
+    }
+
+    if (codeUnit >= 0x61 && codeUnit <= 0x7A) {
+      return LETTER | LOWERCASE
+    }
+
+    if (codeUnit >= 0x30 && codeUnit <= 0x39) {
+      return NUMBER
+    }
+
+    return 0
+  }
+
+  const character = String.fromCodePoint(input.codePointAt(index)!)
+  let type = 0
+
+  if (UNICODE_LETTER.test(character)) {
+    type |= LETTER
+  }
+  if (UNICODE_UPPERCASE.test(character)) {
+    type |= UPPERCASE
+  }
+  if (UNICODE_LOWERCASE.test(character)) {
+    type |= LOWERCASE
+  }
+  if (UNICODE_NUMBER.test(character)) {
+    type |= NUMBER
+  }
+
+  return type
+}
+
+function isWordBoundary(
+  previousType: number,
+  currentType: number,
+  nextType: number
+): boolean {
+  return (
+    ((previousType & (LOWERCASE | NUMBER)) !== 0
+      && (currentType & UPPERCASE) !== 0)
+    || ((previousType & UPPERCASE) !== 0
+      && (currentType & UPPERCASE) !== 0
+      && (nextType & LOWERCASE) !== 0)
+    || ((previousType & LETTER) !== 0
+      && (currentType & NUMBER) !== 0)
+    || ((previousType & NUMBER) !== 0
+      && (currentType & LETTER) !== 0)
+  )
+}
 
 /**
- * Split string into words
+ * Split a string into words in one pass.
  *
- * Handles all common case formats:
- * - camelCase → ['camel', 'Case']
- * - PascalCase → ['Pascal', 'Case']
- * - snake_case → ['snake', 'case']
- * - kebab-case → ['kebab', 'case']
- * - CONSTANT_CASE → ['CONSTANT', 'CASE']
- * - foo2Bar → ['foo', '2', 'Bar']
- *
- * @param input - String to split
- * @returns Array of words
- *
- * @example
- * split('fooBar')        // ['foo', 'Bar']
- * split('foo-bar')       // ['foo', 'bar']
- * split('FOO_BAR')       // ['FOO', 'BAR']
- * split('foo2Bar')       // ['foo', '2', 'Bar']
+ * Handles camelCase, PascalCase, acronyms, separators, Unicode case
+ * boundaries, and letter/number boundaries without allocating intermediate
+ * replacement strings.
  */
 export function split(input: string): string[] {
-  if (!input || input.length === 0) {
+  if (input.length === 0) {
     return []
   }
 
-  // Preserve leading/trailing special characters (they have semantic meaning)
-  const leadingMatch = input.match(LEADING_SPECIAL)
-  const trailingMatch = input.match(TRAILING_SPECIAL)
-  const leading = leadingMatch ? leadingMatch[0] : ''
-  const trailing = trailingMatch ? trailingMatch[0] : ''
+  let leadingEnd = 0
 
-  // Handle edge case: input is only special characters
-  if (leading && trailing && leading.length + trailing.length >= input.length) {
+  while (
+    input.charCodeAt(leadingEnd) === 0x5F
+    || input.charCodeAt(leadingEnd) === 0x24
+  ) {
+    leadingEnd++
+  }
+
+  let trailingStart = input.length
+
+  while (
+    input.charCodeAt(trailingStart - 1) === 0x5F
+    || input.charCodeAt(trailingStart - 1) === 0x24
+  ) {
+    trailingStart--
+  }
+
+  const leadingLength = leadingEnd
+  const trailingLength = input.length - trailingStart
+
+  if (
+    leadingLength > 0
+    && trailingLength > 0
+    && leadingLength + trailingLength >= input.length
+  ) {
     return [input]
   }
 
-  // Strip leading/trailing for processing
-  let processed = input.slice(leading.length)
-  if (trailing) {
-    processed = processed.slice(0, -trailing.length)
+  const leading = leadingLength > 0 ? input.slice(0, leadingEnd) : ''
+  const trailing = trailingLength > 0 ? input.slice(trailingStart) : ''
+  const processed = input.slice(leadingEnd, trailingStart)
+  const words: string[] = []
+  let wordStart = 0
+  let previousType = 0
+
+  for (let index = 0; index < processed.length;) {
+    const width = getCharacterWidth(processed, index)
+    const nextIndex = index + width
+    const currentType = getCharacterType(processed, index)
+
+    if ((currentType & SEPARATOR) !== 0) {
+      if (wordStart < index) {
+        words.push(processed.slice(wordStart, index))
+      }
+
+      wordStart = nextIndex
+      previousType = 0
+      index = nextIndex
+      continue
+    }
+
+    const nextType = getCharacterType(processed, nextIndex)
+
+    if (
+      wordStart < index
+      && isWordBoundary(previousType, currentType, nextType)
+    ) {
+      words.push(processed.slice(wordStart, index))
+      wordStart = index
+    }
+
+    previousType = currentType
+    index = nextIndex
   }
 
-  // Insert hyphens at word boundaries
-  processed = processed
-    .replace(UPPERCASE_LOWERCASE, '$1-$2')  // FOOBar → FOO-Bar
-    .replace(LOWERCASE_UPPERCASE, '$1-$2')  // fooBar → foo-Bar
-    .replace(LETTER_NUMBER, '$1-$2')        // foo2Bar → foo-2Bar
-    .replace(NUMBER_LETTER, '$1-$2')        // foo-2Bar → foo-2-Bar
-
-  // Split on separators and filter empty strings
-  const words = processed
-    .split(SEPARATORS)
-    .filter(word => word.length > 0)
+  if (wordStart < processed.length) {
+    words.push(processed.slice(wordStart))
+  }
 
   if (words.length === 0) {
     return leading || trailing ? [leading + trailing] : []
   }
 
-  // Add back leading/trailing if present
   if (leading) {
-    words[0] = leading + words[0]
+    words[0] = leading + words[0]!
   }
   if (trailing) {
-    words[words.length - 1] = words[words.length - 1] + trailing
+    const lastIndex = words.length - 1
+    words[lastIndex] = words[lastIndex]! + trailing
   }
 
   return words

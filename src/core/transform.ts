@@ -1,18 +1,26 @@
 import type { TransformOptions } from '../types.js'
 
+type Locale = string | string[] | false | undefined
+
+function toLowerCase(input: string, locale: Locale): string {
+  return locale === false
+    ? input.toLowerCase()
+    : input.toLocaleLowerCase(locale)
+}
+
+function toUpperCase(input: string, locale: Locale): string {
+  return locale === false
+    ? input.toUpperCase()
+    : input.toLocaleUpperCase(locale)
+}
+
 /**
- * Transform words according to options
- *
- * @param words - Array of words
- * @param options - Transformation options
- * @returns Transformed string
- *
- * @example
- * transform(['foo', 'bar'], { case: 'lower', separator: '-' })  // 'foo-bar'
- * transform(['foo', 'bar'], { case: 'upper', separator: '_' })  // 'FOO_BAR'
- * transform(['foo', 'bar'], { case: 'capital', separator: ' ' }) // 'Foo Bar'
+ * Transform words according to the requested case and separator.
  */
-export function transform(words: string[], options: TransformOptions): string {
+export function transform(
+  words: readonly string[],
+  options: TransformOptions
+): string {
   if (words.length === 0) {
     return ''
   }
@@ -24,53 +32,42 @@ export function transform(words: string[], options: TransformOptions): string {
     capitalizeAll = false,
     locale,
   } = options
+  let result = ''
 
-  // Create locale-aware case conversion functions
-  const toLowerCase = locale === false
-    ? (str: string) => str.toLowerCase()
-    : (str: string) => str.toLocaleLowerCase(locale)
-
-  const toUpperCase = locale === false
-    ? (str: string) => str.toUpperCase()
-    : (str: string) => str.toLocaleUpperCase(locale)
-
-  const transformedWords = words.map((word, index) => {
-    if (word.length === 0) {
-      return word
-    }
-
-    // Apply case transformation
+  for (let index = 0; index < words.length; index++) {
+    const word = words[index]!
     let transformed = word
 
-    switch (caseType) {
-      case 'lower':
-        transformed = toLowerCase(word)
-        break
-      case 'upper':
-        transformed = toUpperCase(word)
-        break
-      case 'capital':
-        // Capitalize first letter, lowercase rest
-        transformed = toUpperCase(word.charAt(0)) + toLowerCase(word.slice(1))
-        break
-      case 'preserve':
-        // Keep original case
-        transformed = word
-        break
+    if (word.length > 0) {
+      switch (caseType) {
+        case 'lower':
+          transformed = toLowerCase(word, locale)
+          break
+        case 'upper':
+          transformed = toUpperCase(word, locale)
+          break
+        case 'capital':
+          transformed = toUpperCase(word.charAt(0), locale)
+            + toLowerCase(word.slice(1), locale)
+          break
+        case 'preserve':
+          break
+      }
+
+      if (index === 0 && capitalizeFirst) {
+        transformed = toUpperCase(transformed.charAt(0), locale)
+          + transformed.slice(1)
+      } else if (index > 0 && capitalizeAll) {
+        transformed = toUpperCase(transformed.charAt(0), locale)
+          + transformed.slice(1)
+      }
     }
 
-    // Handle first word capitalization
-    if (index === 0 && capitalizeFirst && transformed.length > 0) {
-      transformed = toUpperCase(transformed.charAt(0)) + transformed.slice(1)
+    if (index > 0) {
+      result += separator
     }
+    result += transformed
+  }
 
-    // Handle all words capitalization (except first if it was already handled)
-    if (index > 0 && capitalizeAll && transformed.length > 0) {
-      transformed = toUpperCase(transformed.charAt(0)) + transformed.slice(1)
-    }
-
-    return transformed
-  })
-
-  return transformedWords.join(separator)
+  return result
 }

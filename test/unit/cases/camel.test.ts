@@ -60,6 +60,26 @@ describe('camelCase', () => {
     })
   })
 
+  describe('camelcase@9 options', () => {
+    it('should preserve consecutive uppercase characters', () => {
+      expect(camelCase('foo-BAR', {
+        preserveConsecutiveUppercase: true,
+      })).toBe('fooBAR')
+      expect(camelCase('XMLHttpRequest', {
+        preserveConsecutiveUppercase: true,
+      })).toBe('XMLHttpRequest')
+    })
+
+    it('should not capitalize after numbers when disabled', () => {
+      expect(camelCase('foo2bar', {
+        capitalizeAfterNumber: false,
+      })).toBe('foo2bar')
+      expect(camelCase('Textures_3D', {
+        capitalizeAfterNumber: false,
+      })).toBe('textures3D')
+    })
+  })
+
   describe('special characters', () => {
     it('should preserve leading underscore', () => {
       expect(camelCase('_foo-bar')).toBe('_fooBar')
@@ -71,6 +91,15 @@ describe('camelCase', () => {
 
     it('should preserve multiple leading underscores', () => {
       expect(camelCase('__foo-bar')).toBe('__fooBar')
+    })
+
+    it('should not treat slash as a camelcase separator', () => {
+      expect(camelCase('foo/bar')).toBe('foo/bar')
+    })
+
+    it('should preserve dollar signs outside the leading prefix', () => {
+      expect(camelCase('foo$')).toBe('foo$')
+      expect(camelCase('$foo$')).toBe('$foo$')
     })
   })
 
@@ -118,6 +147,12 @@ describe('camelCase', () => {
   describe('Unicode support', () => {
     it('should handle Unicode characters', () => {
       expect(camelCase('розовый_пушистый')).toBe('розовыйПушистый')
+    })
+
+    it('should detect Unicode case boundaries', () => {
+      expect(camelCase('fooÄBar')).toBe('fooÄbar')
+      expect(camelCase('БыстрыйТест')).toBe('быстрыйТест')
+      expect(camelCase('αΒeta')).toBe('αΒeta')
     })
   })
 })

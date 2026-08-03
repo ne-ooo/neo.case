@@ -51,3 +51,36 @@ describe('camelCase Performance - Array Input', () => {
     originalCamelCase(arrayInput)
   })
 })
+
+describe('camelCase Performance - Unicode and Options', () => {
+  const unicodeInput = 'БыстрыйТестÜberAllesΑλφαΒήτα'
+  const uppercaseInput = 'foo-XML-HTTP-API'
+
+  bench('neo.case camelCase - Unicode', () => {
+    neoCamelCase(unicodeInput)
+  })
+
+  bench('original camelCase - Unicode', () => {
+    originalCamelCase(unicodeInput)
+  })
+
+  bench('neo.case camelCase - preserve uppercase', () => {
+    neoCamelCase(uppercaseInput, { preserveConsecutiveUppercase: true })
+  })
+
+  bench('original camelCase - preserve uppercase', () => {
+    originalCamelCase(uppercaseInput, { preserveConsecutiveUppercase: true })
+  })
+})
+
+describe('camelCase Performance - Long Input', () => {
+  const uppercaseInput = 'A'.repeat(4096)
+
+  bench('neo.case camelCase - 4 KiB uppercase', () => {
+    neoCamelCase(uppercaseInput)
+  })
+
+  bench('original camelCase - 4 KiB uppercase', () => {
+    originalCamelCase(uppercaseInput)
+  })
+})

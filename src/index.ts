@@ -15,7 +15,12 @@
  */
 
 // Re-export types
-export type { CaseInput, CaseOptions, TransformOptions } from './types.js'
+export type {
+  CaseInput,
+  CaseOptions,
+  Options,
+  TransformOptions,
+} from './types.js'
 
 // Re-export core utilities (for advanced usage)
 export { split } from './core/split.js'
@@ -23,6 +28,7 @@ export { transform } from './core/transform.js'
 
 // Re-export all case conversion functions (tree-shakeable)
 export { camelCase } from './cases/camel.js'
+export { camelCase as default } from './cases/camel.js'
 export { pascalCase } from './cases/pascal.js'
 export { snakeCase } from './cases/snake.js'
 export { kebabCase } from './cases/kebab.js'

@@ -8,10 +8,10 @@ Convert between camelCase, snake_case, kebab-case, and 7 more cases. **100% back
 
 ✅ **10 case types** - camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, dot.case, path/case, Sentence case, Title Case, Train-Case
 ✅ **Zero dependencies** - No external runtime dependencies
-✅ **Tree-shakeable** - Import only what you need (~1.3 KB all cases, tree-shake to ~300-400 bytes per case)
+✅ **Tree-shakeable** - Import only what you need (~2.0 KB gzipped for all cases, ~1.0 KB for one case)
 ✅ **TypeScript-first** - Built with TypeScript, full type safety
 ✅ **100% backward compatible** - Drop-in replacement for `camelcase` package
-✅ **Fast** - Competitive performance (0.9-1.2M ops/sec for camelCase)
+✅ **Fast** - 4-6M ops/sec for common generalized conversions and up to 4.3M ops/sec for camelCase
 ✅ **Unicode support** - Handles international characters
 ✅ **Modern** - ESM + CJS, Node.js 18+, modern browsers
 
@@ -81,13 +81,13 @@ camelCase("розовый_пушистый"); // 'розовыйПушистый
 Import only what you need for minimal bundle size:
 
 ```typescript
-// Import single case (~300-400 bytes gzipped)
+// Import single case (~1.0 KB gzipped)
 import { camelCase } from "@lpm.dev/neo.case";
 
-// Import multiple cases (~600-800 bytes gzipped)
+// Import camel + snake + kebab (~1.76 KB gzipped)
 import { camelCase, snakeCase, kebabCase } from "@lpm.dev/neo.case";
 
-// Import all cases (~1.3 KB gzipped)
+// Import all cases (~2.0 KB gzipped)
 import * as cases from "@lpm.dev/neo.case";
 ```
 
@@ -172,6 +172,8 @@ pathCase("fooBar"); // 'foo/bar'
 pathCase("foo-bar"); // 'foo/bar'
 ```
 
+> **Security:** `pathCase()` formats trusted identifiers; it does not sanitize or validate filesystem paths. Do not use its output as a security boundary for user-controlled paths. Backslashes, drive prefixes, UNC paths, and other platform-specific path syntax may be preserved.
+
 #### `sentenceCase(input)`
 
 Convert to Sentence case
@@ -238,49 +240,57 @@ transform(["foo", "bar"], {
 
 ```diff
 - import camelCase from 'camelcase'
-+ import { camelCase } from '@lpm.dev/neo.case'
++ import camelCase from '@lpm.dev/neo.case'
 
 // All existing code works identically
 camelCase('foo-bar')  // 'fooBar'
 ```
 
+`camelCase` is also available as a named export alongside the additional case functions.
+
 **Benefits of switching:**
 
 - ✅ **Same API** - Zero code changes needed
 - ✅ **More cases** - Get 9 additional case types for free
-- ✅ **Smaller bundle** - Tree-shake to only what you need
+- ✅ **Tree-shakeable bundle** - Include only the case functions you use
 - ✅ **TypeScript** - Native TypeScript types (no @types package needed)
 
 ## Performance
 
 Benchmarks vs `camelcase` package (higher is better):
 
-| Operation                              | neo.case    | original    | Comparison          |
+| Operation                              | neo.case    | camelcase@9 | Comparison          |
 | -------------------------------------- | ----------- | ----------- | ------------------- |
-| `camelCase('foo-bar')`                 | 1.24M ops/s | 1.94M ops/s | 0.64x               |
-| `camelCase('FooBar')`                  | 1.07M ops/s | 1.00M ops/s | **1.07x faster** ✅ |
-| `camelCase` with consecutive uppercase | 1.12M ops/s | 1.00M ops/s | **1.11x faster** ✅ |
-| `camelCase` with numbers               | 0.96M ops/s | 0.90M ops/s | **1.06x faster** ✅ |
+| `camelCase('foo-bar')`                 | 4.31M ops/s | 3.26M ops/s | **1.32x faster** ✅ |
+| `camelCase('FooBar')`                  | 2.07M ops/s | 1.83M ops/s | **1.13x faster** ✅ |
+| Consecutive uppercase                  | 2.10M ops/s | 1.86M ops/s | **1.13x faster** ✅ |
+| Numbers                                | 1.80M ops/s | 1.60M ops/s | **1.13x faster** ✅ |
+| Array input                            | 2.72M ops/s | 2.28M ops/s | **1.19x faster** ✅ |
 
-**Summary**: neo.case is competitive with camelcase for simple cases, and **faster for complex cases** (consecutive uppercase, numbers). Performance is excellent across all operations (0.9-1.2M ops/sec).
+Common snake, kebab, dot, path, and related conversions run at approximately **4.3-6.2M ops/sec**. Run `npm run bench` to reproduce the full suite; see [BENCHMARKS.md](./BENCHMARKS.md) for methodology and long/Unicode workloads.
 
 ## Bundle Size
 
-| Import                              | Size (gzipped) | Comparison                  |
-| ----------------------------------- | -------------- | --------------------------- |
-| Full package (all 10 cases)         | ~1.33 KB       | **57% smaller than target** |
-| Single case (tree-shaken)           | ~300-400 bytes | Tiny!                       |
-| Three cases (camel + snake + kebab) | ~600-800 bytes | Very small                  |
+| Import                              | Size (gzipped) |
+| ----------------------------------- | -------------- |
+| Full package (all exports)          | ~1.98 KB       |
+| Single case (camel or snake)        | ~0.98-1.02 KB  |
+| Three cases (camel + snake + kebab) | ~1.76 KB       |
 
 **Comparison:**
 
-- `camelcase`: ~2 KB minified (2 cases)
-- `@lpm.dev/neo.case`: ~1.33 KB gzipped (10 cases) ✅
+- `camelcase@9` camel-only bundle: ~0.91 KB gzipped
+- `@lpm.dev/neo.case` camel-only bundle: ~0.98 KB gzipped
+- `@lpm.dev/neo.case` full bundle: ~1.98 KB gzipped for all exports
+
+Measured with esbuild 0.28.1 using browser ESM bundling, minification, tree-shaking, and gzip. Run `npm run size` to reproduce the table. Small changes in bundler or call-site code can change exact output.
 
 ## Requirements
 
 - Node.js >= 18
 - Modern browsers (ES2022+)
+
+Contributors need Node.js >= 20 and npm 11.17.0 for the locked test/build toolchain. Published runtime support remains Node.js >= 18.
 
 ## TypeScript
 

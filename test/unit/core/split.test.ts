@@ -22,6 +22,11 @@ describe('split', () => {
     it('should split XMLHttpRequest style', () => {
       expect(split('XMLHttpRequest')).toEqual(['XML', 'Http', 'Request'])
     })
+
+    it('should split non-ASCII camelCase boundaries', () => {
+      expect(split('БыстрыйТест')).toEqual(['Быстрый', 'Тест'])
+      expect(split('αΒeta')).toEqual(['α', 'Βeta'])
+    })
   })
 
   describe('snake_case, kebab-case, and separators', () => {
@@ -113,6 +118,14 @@ describe('split', () => {
 
     it('should filter out empty words from consecutive separators', () => {
       expect(split('foo---bar')).toEqual(['foo', 'bar'])
+    })
+
+    it('should process long uppercase input in linear time', () => {
+      const input = 'A'.repeat(32_000)
+      const start = performance.now()
+
+      expect(split(input)).toEqual([input])
+      expect(performance.now() - start).toBeLessThan(250)
     })
   })
 })

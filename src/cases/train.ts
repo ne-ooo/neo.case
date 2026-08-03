@@ -14,7 +14,7 @@ import type { CaseInput } from '../types.js'
  * trainCase(['foo', 'bar'])   // 'Foo-Bar'
  */
 export function trainCase(input: CaseInput): string {
-  const str = Array.isArray(input) ? input.join('-') : input
+  const str = typeof input === 'string' ? input : input.join('-')
 
   if (!str || str.length === 0) {
     return ''

@@ -6,28 +6,33 @@ export interface CaseOptions {
    * Convert to PascalCase instead of camelCase
    * @default false
    */
-  pascalCase?: boolean
+  readonly pascalCase?: boolean
 
   /**
    * Preserve consecutive uppercase letters
    * Example: 'fooBAR' instead of 'fooBar'
    * @default false
    */
-  preserveConsecutiveUppercase?: boolean
+  readonly preserveConsecutiveUppercase?: boolean
 
   /**
    * Capitalize letters after numbers
    * Example: 'foo2Bar' instead of 'foo2bar'
    * @default true
    */
-  capitalizeAfterNumber?: boolean
+  readonly capitalizeAfterNumber?: boolean
 
   /**
    * Locale for case conversion
    * @default Host environment locale
    */
-  locale?: string | string[] | false
+  readonly locale?: string | readonly string[] | false
 }
+
+/**
+ * camelcase-compatible name for {@link CaseOptions}
+ */
+export type Options = CaseOptions
 
 /**
  * Transform options for custom cases
@@ -64,4 +69,4 @@ export interface TransformOptions {
 /**
  * Input type for case functions
  */
-export type CaseInput = string | string[]
+export type CaseInput = string | readonly string[]

@@ -16,7 +16,7 @@ globs:
 The package is tree-shakeable (`sideEffects: false`). Import only the functions you use:
 
 ```typescript
-// Good — tree-shakeable, ~300-400 bytes per function
+// Good — tree-shakeable, ~1 KB gzipped for one case function
 import { camelCase, snakeCase } from '@lpm.dev/neo.case'
 
 // Avoid — imports all 10 functions unnecessarily
@@ -26,7 +26,7 @@ import { camelCase, pascalCase, snakeCase, kebabCase, constantCase,
 
 ## Case Functions
 
-All 10 functions accept any case format as input — the splitter handles camelCase, PascalCase, snake_case, kebab-case, dot.case, path/case, CONSTANT_CASE, spaces, and mixed separators automatically.
+The general case functions handle camelCase, PascalCase, snake_case, kebab-case, dot.case, path/case, CONSTANT_CASE, spaces, and mixed separators automatically. `camelCase` follows `camelcase@9` separator semantics, so it intentionally preserves `/` instead of treating it as a word boundary.
 
 ### Code identifiers
 
@@ -48,6 +48,8 @@ kebabCase('fooBar')         // 'foo-bar'
 dotCase('fooBar')           // 'foo.bar'
 pathCase('fooBar')          // 'foo/bar'
 ```
+
+`pathCase()` is for formatting trusted identifiers, not sanitizing user-controlled filesystem paths. Validate path syntax and containment separately before calling filesystem APIs.
 
 ### Human-readable text
 
@@ -92,9 +94,13 @@ import { camelCase } from '@lpm.dev/neo.case'
 // Default behavior
 camelCase('foo-bar')  // 'fooBar'
 
+// Preserve acronyms and control number boundaries
+camelCase('foo-BAR', { preserveConsecutiveUppercase: true }) // 'fooBAR'
+camelCase('foo2bar', { capitalizeAfterNumber: false })       // 'foo2bar'
+
 // With locale-aware conversion
 camelCase('foo-bar', { locale: 'tr' })  // Turkish locale rules
-camelCase('foo-bar', { locale: false }) // Disable locale (ASCII only)
+camelCase('foo-bar', { locale: false }) // Unicode default case conversion
 ```
 
 ## Special Character Preservation
@@ -164,7 +170,7 @@ This is hardcoded in the splitter — numbers always create word boundaries. Kee
 | URLs, CSS classes, CLI args | `kebabCase` | `my-class` |
 | Environment variables | `constantCase` | `MY_CONSTANT` |
 | Package names, config keys | `dotCase` | `my.config` |
-| File paths | `pathCase` | `my/path` |
+| Trusted path-like identifiers | `pathCase` | `my/path` |
 | UI labels | `sentenceCase` | `My label` |
 | Headings, titles | `titleCase` | `My Title` |
 | HTTP headers | `trainCase` | `My-Header` |
