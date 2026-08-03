@@ -68,12 +68,12 @@
   },
   "homepage": "https://github.com/ne-ooo/neo.case#readme",
   "devDependencies": {
-    "@types/node": "^20.19.43",
+    "@types/node": "^26.1.2",
     "@vitest/coverage-v8": "^4.1.10",
     "camelcase": "^9.0.0",
     "esbuild": "0.28.1",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
   "overrides": {
