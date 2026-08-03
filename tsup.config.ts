@@ -8,5 +8,7 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   minify: false,
-  treeshake: true,
+  // esbuild already tree-shakes bundled ESM. Disabling tsup's additional
+  // Rollup pass avoids mixed default/named-export warnings for the CJS build.
+  treeshake: false,
 })

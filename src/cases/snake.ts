@@ -15,7 +15,7 @@ import type { CaseInput } from '../types.js'
  * snakeCase(['foo', 'bar'])   // 'foo_bar'
  */
 export function snakeCase(input: CaseInput): string {
-  const str = Array.isArray(input) ? input.join('-') : input
+  const str = typeof input === 'string' ? input : input.join('-')
 
   if (!str || str.length === 0) {
     return ''

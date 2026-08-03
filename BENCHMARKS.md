@@ -1,235 +1,103 @@
-# @lpm.dev/neo.case - Performance Benchmarks
+# @lpm.dev/neo.case Benchmarks
 
-**Date**: February 18, 2026
-**Environment**: Node.js v23.x, Darwin 25.3.0
-**Benchmark Tool**: Vitest v1.6.1
+**Date:** August 3, 2026
 
----
+**Runtime:** Node.js 26.5.0, Vitest 4.1.10
 
-## Executive Summary
+**Platform:** Apple M5 Pro, Darwin 25.5.0 arm64
 
-### Performance vs `camelcase` (90M downloads/week)
+Run the benchmark suite with:
 
-| Category | neo.case | original | Comparison |
-|----------|----------|----------|------------|
-| **Simple cases** (foo-bar, foo_bar) | 1.1-1.2M ops/s | 1.9-2.0M ops/s | 0.59-0.63x |
-| **Complex cases** (PascalCase, uppercase, numbers) | 0.9-1.1M ops/s | 0.9-1.0M ops/s | **1.03-1.27x faster** ✅ |
-| **Array input** | 0.97M ops/s | 1.37M ops/s | 0.71x |
-
-**Verdict**:
-- ✅ **Faster for complex cases** (consecutive uppercase: 1.09x, with numbers: 1.03x, PascalCase: 1.10x)
-- ⚡ **Excellent absolute performance** (0.9-1.2M ops/sec for all operations)
-- 🎯 **Trade-off justified**: 10 case types vs 2, smaller bundle, better for real-world complexity
-
----
-
-## All Cases Performance
-
-### Common Input (`'foo-bar-baz-qux'`)
-
-| Case Function | Operations/sec | Comparison | Notes |
-|---------------|----------------|------------|-------|
-| `snakeCase` | **1,217,565** | Fastest | 1.98x faster than slowest |
-| `kebabCase` | 1,216,155 | 2nd fastest | Near identical to snake |
-| `dotCase` | 1,126,062 | Very fast | |
-| `constantCase` | 1,123,759 | Very fast | |
-| `trainCase` | 1,056,658 | Fast | |
-| `titleCase` | 1,021,210 | Fast | |
-| `camelCase` | 898,589 | Good | More complex logic |
-| `sentenceCase` | 795,794 | Good | |
-| `pascalCase` | 688,160 | Good | |
-| `pathCase` | 615,373 | Slowest | Path separator handling |
-
-**Average**: ~988,133 ops/sec across all 10 cases
-
-**Key Insights**:
-- Simple transformations (snake, kebab, dot, constant) are fastest (1.1-1.2M ops/s)
-- Complex transformations (camel, pascal) are slower but still excellent (0.7-0.9M ops/s)
-- All cases perform well above 600K ops/sec threshold
-
----
-
-## camelCase Performance - Common Cases
-
-### vs `camelcase` package
-
-| Input | neo.case ops/s | original ops/s | Speedup |
-|-------|----------------|----------------|---------|
-| `'foo-bar'` | 1,224,496 | 1,936,131 | 0.63x |
-| `'foo_bar'` | 1,114,759 | **1,972,785** | 0.56x |
-| `'FooBar'` | **1,120,012** | 1,018,033 | **1.10x faster** ✅ |
-| `'foo-bar-baz-qux'` | 841,637 | 1,310,339 | 0.64x |
-| `'foo_bar_baz_qux'` | 883,770 | 1,280,448 | 0.69x |
-
-**Summary**:
-- Original is ~1.4-1.8x faster for simple separator-based cases
-- neo.case is **1.10x faster** for PascalCase conversion
-- neo.case maintains good absolute performance (0.8-1.2M ops/s)
-
----
-
-## camelCase Performance - Complex Cases
-
-### Consecutive Uppercase
-
-| Implementation | Operations/sec | Comparison |
-|----------------|----------------|------------|
-| neo.case | **1,122,829** | **1.09x faster** ✅ |
-| original | 1,029,095 | Baseline |
-
-**Insight**: Our simpler algorithm handles consecutive uppercase better.
-
-### With Numbers
-
-| Implementation | Operations/sec | Comparison |
-|----------------|----------------|------------|
-| neo.case | **906,020** | **1.03x faster** ✅ |
-| original | 881,365 | Baseline |
-
-**Insight**: Number boundary detection is more efficient in neo.case.
-
----
-
-## camelCase Performance - Array Input
-
-| Implementation | Operations/sec | Comparison |
-|----------------|----------------|------------|
-| original | **1,366,824** | **1.41x faster** |
-| neo.case | 969,453 | Baseline |
-
-**Insight**: Original has optimized array handling. Still acceptable performance.
-
----
-
-## Performance Analysis
-
-### Why is original faster for simple cases?
-
-1. **Specialized optimizations**: Original `camelcase` has specific optimizations for the most common separator patterns (`-`, `_`)
-2. **Fewer abstractions**: Direct implementation without unified pipeline reduces overhead
-3. **Single purpose**: Only handles 2 cases (camelCase, PascalCase), can optimize heavily
-
-### Why is neo.case faster for complex cases?
-
-1. **Simpler algorithm**: Unified split → transform → join pipeline has less state management
-2. **Optimized regex**: Pre-compiled patterns for number/letter boundaries
-3. **Better for edge cases**: Handles consecutive uppercase and numbers more efficiently
-
-### Real-World Impact
-
-| Scenario | Impact | Reasoning |
-|----------|--------|-----------|
-| **Build tools** | Minimal | Case conversion is <1% of build time |
-| **CLI tools** | Negligible | Human-perceptible latency starts at ~100ms |
-| **Web apps** | None | Happens once at runtime, cached |
-| **Data processing** | Small | Even at 10,000 conversions/sec difference is ~5ms |
-
-**Conclusion**: Performance difference is negligible in real-world use. The trade-offs (10 cases, smaller bundle, simpler code) far outweigh the ~0.6x speed difference for simple cases.
-
----
-
-## Conversion Performance - camelCase Input
-
-### Converting FROM camelCase
-
-| Target Case | Operations/sec | Notes |
-|-------------|----------------|-------|
-| `snakeCase` | **1,062,422** | Fastest |
-| `kebabCase` | 1,028,432 | Very fast |
-| `constantCase` | 944,416 | Fast |
-| `camelCase` | 808,344 | Identity (re-parsing) |
-
-**Insight**: Converting from camelCase is very efficient (0.8-1.1M ops/s).
-
----
-
-## Detailed Benchmark Results
-
-### Test Environment
-
-```
-Platform: Darwin 25.3.0
-Node: v23.x
-CPU: Apple Silicon
-Test Framework: Vitest v1.6.1
-Samples: 300K-600K per test
+```bash
+npm ci
+npm run bench
 ```
 
-### All Cases - Common Input ('foo-bar-baz-qux')
+Results are microbenchmarks, not application latency guarantees. Operations per second vary by CPU, runtime, thermal state, and surrounding code.
 
-```
-name                    hz          min      max      mean     rme
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-camelCase       898,589     0.0009   1.1721   0.0011   ±0.72%
-pascalCase      688,160     0.0010   7.5719   0.0015   ±5.40%
-snakeCase     1,217,565     0.0007   1.2523   0.0008   ±0.86%  ★
-kebabCase     1,216,155     0.0006   4.2948   0.0008   ±1.86%
-constantCase  1,123,759     0.0007   1.0246   0.0009   ±0.54%
-dotCase       1,126,062     0.0007   2.8781   0.0009   ±1.63%
-pathCase        615,373     0.0006  47.5303   0.0016  ±25.14%
-sentenceCase    795,794     0.0007  28.5722   0.0013  ±12.95%
-titleCase     1,021,210     0.0008   1.0020   0.0010   ±0.61%
-trainCase     1,056,658     0.0008   1.1093   0.0009   ±0.74%
-```
+## Performance Optimization Result
 
-### camelCase - Common Cases
+The shared conversion pipeline now uses:
 
-```
-Input                           neo.case     original      Speedup
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'foo-bar'                    1,224,496    1,936,131      0.63x
-'foo_bar'                    1,114,759    1,972,785      0.56x
-'FooBar'                     1,120,012    1,018,033      1.10x  ★
-'foo-bar-baz-qux'              841,637    1,310,339      0.64x
-'foo_bar_baz_qux'              883,770    1,280,448      0.69x
-```
+- a single-pass splitter with an ASCII fast path and Unicode fallback;
+- source slices instead of four full-string regex replacements;
+- a direct transformation loop without `map()` and intermediate output arrays;
+- cached camelCase normalization and a lower-overhead PascalCase wrapper.
 
-### camelCase - Edge Cases
+The before and after measurements below were taken in the same environment and process setup.
 
-```
-Test                              neo.case     original      Speedup
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Consecutive uppercase          1,122,829    1,029,095      1.09x  ★
-With numbers                     906,020      881,365      1.03x  ★
-Array input                      969,453    1,366,824      0.71x
-```
+| Common input (`foo-bar-baz-qux`) | Before | After | Improvement |
+|---|---:|---:|---:|
+| camelCase | 2.37M | 2.62M | 1.11x |
+| pascalCase | 2.13M | 2.34M | 1.10x |
+| snakeCase | 2.23M | 6.14M | 2.76x |
+| kebabCase | 2.15M | 6.07M | 2.83x |
+| constantCase | 2.03M | 4.98M | 2.46x |
+| dotCase | 2.12M | 6.04M | 2.84x |
+| pathCase | 2.20M | 6.09M | 2.77x |
+| sentenceCase | 2.13M | 5.50M | 2.58x |
+| titleCase | 1.86M | 4.31M | 2.31x |
+| trainCase | 1.86M | 4.29M | 2.31x |
 
----
+Conversions from camelCase benefit particularly from eliminating the regex replacement pipeline:
 
-## Performance Recommendations
+| Input (`fooBarBazQux`) | Before | After | Improvement |
+|---|---:|---:|---:|
+| snakeCase | 1.78M | 5.98M | 3.35x |
+| kebabCase | 1.81M | 6.22M | 3.44x |
+| constantCase | 1.68M | 4.92M | 2.93x |
 
-### When to Use neo.case
+## camelcase@9 Comparison
 
-✅ **Use neo.case when:**
-- You need **multiple case types** (not just camel/pascal)
-- You want **smaller bundle** (tree-shakeable)
-- You work with **complex inputs** (consecutive uppercase, numbers, Unicode)
-- You want **native TypeScript** types
-- Performance difference is **negligible for your use case** (most apps)
+neo.case preserves camelcase@9 behavior and types while keeping a dedicated compatibility hot path.
 
-### When original might be preferred
+| Workload | neo.case | camelcase@9 | Comparison |
+|---|---:|---:|---:|
+| `foo-bar` | 4.31M | 3.26M | 1.32x faster |
+| `foo_bar` | 4.26M | 3.27M | 1.30x faster |
+| `FooBar` | 2.07M | 1.83M | 1.13x faster |
+| `foo-bar-baz-qux` | 2.59M | 2.22M | 1.17x faster |
+| Consecutive uppercase | 2.10M | 1.86M | 1.13x faster |
+| Numbers | 1.80M | 1.60M | 1.13x faster |
+| Array input | 2.72M | 2.28M | 1.19x faster |
+| Unicode | 338K | 336K | parity |
+| Preserve uppercase option | 1.03M | 1.03M | parity |
+| 4 KiB uppercase | 7.42K | 8.74K | 0.85x |
 
-⚠️ **Consider original if:**
-- You **only** need camelCase/PascalCase
-- You're doing **extreme high-frequency** conversions (millions/sec)
-- You're already using it and don't need new features
+The long-uppercase result is retained explicitly: the compatibility algorithm is linear for this workload but camelcase@9 remains about 18% faster at 4 KiB. The generalized `split()` security regression is separately protected by tests and benchmarks.
 
----
+## Split Workloads
 
-## Conclusion
+| Workload | Operations/sec |
+|---|---:|
+| camelCase ASCII | 8.59M |
+| Separator-delimited ASCII | 8.58M |
+| Acronyms and numbers | 5.71M |
+| Unicode case boundaries | 509K |
+| 4 KiB uppercase | 59.5K |
+| 3 KiB mixed boundaries | 55.9K |
 
-**neo.case delivers:**
-- ✅ **Excellent absolute performance** (0.6-1.2M ops/sec across all cases)
-- ✅ **Faster for complex cases** (1.03-1.27x speedup)
-- ✅ **10 case types** vs original's 2
-- ✅ **Smaller bundle** (~1.3 KB vs ~2 KB)
-- ✅ **100% backward compatible** with camelcase package
+The long-input workloads make algorithmic-complexity regressions visible in the standard benchmark command.
 
-**The trade-off of 0.6x speed for simple cases is justified by:**
-1. Still excellent absolute performance (>1M ops/sec)
-2. 5x more features (10 cases vs 2)
-3. 35% smaller bundle
-4. Simpler, more maintainable code
-5. Faster for complex real-world cases
+## Bundle Measurements
 
-**Real-world impact**: Negligible. Even at 10,000 conversions/second, the difference is ~5ms total.
+Measured with esbuild 0.28.1, browser ESM output, minification, tree-shaking, and gzip. The tiny call-site used to retain imports is included consistently in every measurement.
+
+Run `npm run size` to rebuild the package and reproduce these measurements.
+
+| Import | Raw | Gzipped |
+|---|---:|---:|
+| camelCase only | 2,075 B | 983 B |
+| snakeCase only | 2,101 B | 1,016 B |
+| camel + snake + kebab | 4,145 B | 1,764 B |
+| all exports | 5,328 B | 1,984 B |
+| camelcase@9 only | 1,847 B | 907 B |
+
+The optimized Unicode-aware scanner increases the full tree-shaken bundle by roughly 382 gzip bytes compared with the previous regex implementation, while improving common generalized conversion throughput by approximately 2.3-3.4x.
+
+## Interpreting the Results
+
+- Prefer direct conversion instead of chaining case functions.
+- The generalized functions are fastest on ASCII identifiers and separators.
+- Unicode conversion remains fully supported but requires Unicode category checks.
+- Case conversion is rarely an application bottleneck; benchmark with representative production strings before designing caches or specialized wrappers.

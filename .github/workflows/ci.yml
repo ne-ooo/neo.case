@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up contributor Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Use the locked npm version
+        run: npm install --global npm@11.17.0
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Audit all dependencies
+        run: npm run audit
+
+      - name: Typecheck, test with coverage, and build
+        run: npm run check
+
+      - name: Measure tree-shaken bundles
+        run: npm run size
+
+      - name: Set up minimum runtime Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 18
+
+      - name: Smoke-test ESM and CJS on Node.js 18
+        run: node test/runtime-smoke.mjs

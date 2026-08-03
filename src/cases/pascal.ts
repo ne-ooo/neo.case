@@ -1,4 +1,4 @@
-import { camelCase } from './camel.js'
+import { convertToPascalCase } from './camel.js'
 import type { CaseInput, CaseOptions } from '../types.js'
 
 /**
@@ -19,5 +19,5 @@ export function pascalCase(
   input: CaseInput,
   options: Omit<CaseOptions, 'pascalCase'> = {}
 ): string {
-  return camelCase(input, { ...options, pascalCase: true })
+  return convertToPascalCase(input, options)
 }

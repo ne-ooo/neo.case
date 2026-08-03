@@ -1,6 +1,6 @@
 ---
 name: anti-patterns
-description: Common mistakes when using neo.case — chaining conversions, array input batch trap, number boundary splitting, unimplemented options, and pascalCase option confusion
+description: Common mistakes when using neo.case — chaining conversions, array input batch traps, number-boundary options, and pascalCase option confusion
 version: "0.1.0"
 globs:
   - "**/*.ts"
@@ -8,6 +8,27 @@ globs:
 ---
 
 # Anti-Patterns for @lpm.dev/neo.case
+
+### [CRITICAL] Using pathCase as a filesystem-path sanitizer
+
+Wrong:
+
+```typescript
+const path = pathCase(userInput)
+await readFile(path)
+```
+
+Correct:
+
+```typescript
+// Validate that the input is an allowed relative path and remains inside the
+// intended root with a dedicated path-security check before filesystem use.
+const path = pathCase(trustedIdentifier)
+```
+
+`pathCase()` formats words with `/`; it does not reject absolute paths, Windows drive prefixes, UNC paths, backslashes, traversal syntax, or control characters. Never treat case conversion as validation or containment.
+
+Source: `src/cases/path.ts` — formatting only
 
 ### [HIGH] Chaining case conversions instead of converting directly
 
@@ -23,7 +44,7 @@ Correct:
 const result = camelCase(input)
 ```
 
-Every case function already handles every input format. The splitter recognizes camelCase, PascalCase, snake_case, kebab-case, dot.case, path/case, CONSTANT_CASE, spaces, and mixed separators — all in one pass. Chaining does double work and can introduce subtle bugs with edge cases like acronyms or leading special characters.
+Each function handles its documented input formats directly. The general splitter recognizes camelCase, PascalCase, snake_case, kebab-case, dot.case, path/case, CONSTANT_CASE, spaces, and mixed separators. `camelCase` follows `camelcase@9` exactly and therefore preserves `/`. Chaining does double work and can introduce subtle bugs with edge cases like acronyms or leading special characters.
 
 Source: `src/core/split.ts` — unified splitter handles all formats
 
@@ -69,58 +90,53 @@ const parts = ['fooBar', 'baz']  // already clean words
 camelCase(parts)  // 'fooBarBaz'
 ```
 
-Array elements are joined with `-`, then the splitter recognizes ALL separators (`_`, `.`, `-`, `/`, ` `) in the resulting string. Separators inside array elements create additional word boundaries.
+Array elements are joined with `-`, then processed as one input. For `camelCase`, the compatible separators are `_`, `.`, `-`, and space; `/` is preserved to match `camelcase@9`. The other case functions also recognize `/` as a word boundary.
 
-Source: `src/core/split.ts` — splitter treats all separators equivalently, maintainer interview
+Source: `src/cases/camel.ts`, `src/core/split.ts`
 
-### [HIGH] Expecting number-boundary options to work
+### [HIGH] Assuming camelCase always capitalizes after numbers
 
 Wrong:
 
 ```typescript
-// Trying to prevent capitalization after numbers
 camelCase('user2factor', { capitalizeAfterNumber: false })
-// Still returns 'user2Factor' — option is silently ignored
+// Expecting: 'user2Factor'
 ```
 
 Correct:
 
 ```typescript
-// Accept that numbers always create word boundaries
-camelCase('user2factor')    // 'user2Factor' — this is the only behavior
-snakeCase('sha256hash')     // 'sha_256_hash'
-kebabCase('v2api')          // 'v-2-api'
+camelCase('user2factor')
+// 'user2Factor' — default behavior
 
-// If you need 'user2factor' unchanged, handle it outside the library
+camelCase('user2factor', { capitalizeAfterNumber: false })
+// 'user2factor' — preserves the case after the number
 ```
 
-The `capitalizeAfterNumber` option exists in the TypeScript types but is never read by the implementation. Number boundaries are hardcoded in the regex splitter and cannot be disabled. This affects all 10 case functions.
+The option follows `camelcase@9` semantics. It affects `camelCase` and `pascalCase`; the other case functions intentionally treat numbers as word boundaries.
 
-Source: `src/core/split.ts:54-58` — LETTER_NUMBER and NUMBER_LETTER regexes, maintainer interview
+Source: `src/cases/camel.ts` — camelcase@9-compatible number processing
 
-### [HIGH] Expecting preserveConsecutiveUppercase to work
+### [HIGH] Expecting acronyms to be preserved without opting in
 
 Wrong:
+
+```typescript
+camelCase('foo-BAR')
+// Expecting: 'fooBAR'
+// Actually: 'fooBar'
+```
+
+Correct:
 
 ```typescript
 camelCase('foo-BAR', { preserveConsecutiveUppercase: true })
-// Returns 'fooBar' — BAR is lowercased regardless
+// 'fooBAR'
 ```
 
-Correct:
+Use `preserveConsecutiveUppercase` when existing acronym casing is semantically important.
 
-```typescript
-// The option is accepted by TypeScript but silently ignored at runtime
-camelCase('foo-BAR')  // 'fooBar' — always lowercases consecutive uppercase
-
-// For acronym preservation, handle it yourself
-const ACRONYMS = new Set(['URL', 'XML', 'HTTP', 'API'])
-// Custom post-processing needed
-```
-
-The `preserveConsecutiveUppercase` option appears in the type definition but the implementation never reads it. All consecutive uppercase letters are lowercased. If you need to preserve acronyms like `URL` or `XML`, implement a post-processing allowlist.
-
-Source: `src/types.ts:12` — option defined, `src/cases/camel.ts` — never read, maintainer interview
+Source: `src/cases/camel.ts` — camelcase@9-compatible uppercase preservation
 
 ### [MEDIUM] Using camelCase with pascalCase option instead of pascalCase()
 
@@ -159,6 +175,6 @@ import { camelCase } from '@lpm.dev/neo.case'
 const name = camelCase(input)
 ```
 
-The package is tree-shakeable (`sideEffects: false`), so bundlers will eliminate unused imports. But importing everything adds code noise and signals the code wasn't written with intent. Each function is ~300-400 bytes — import only what you use.
+The package is tree-shakeable (`sideEffects: false`), so bundlers will eliminate unused imports. But importing everything adds code noise and signals the code wasn't written with intent. A single case function is approximately 1 KB gzipped with the shared Unicode-aware core; import only what you use.
 
 Source: `package.json` — sideEffects: false, maintainer interview

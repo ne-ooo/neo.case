@@ -15,7 +15,7 @@ import type { CaseInput } from '../types.js'
  * kebabCase(['foo', 'bar'])   // 'foo-bar'
  */
 export function kebabCase(input: CaseInput): string {
-  const str = Array.isArray(input) ? input.join('-') : input
+  const str = typeof input === 'string' ? input : input.join('-')
 
   if (!str || str.length === 0) {
     return ''
