@@ -1,7 +1,7 @@
 ---
 name: anti-patterns
 description: Common mistakes when using neo.case — chaining conversions, array input batch traps, number-boundary options, and pascalCase option confusion
-version: "0.1.0"
+version: "1.1.0"
 globs:
   - "**/*.ts"
   - "**/*.js"

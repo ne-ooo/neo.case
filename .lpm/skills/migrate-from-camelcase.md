@@ -1,7 +1,7 @@
 ---
 name: migrate-from-camelcase
 description: Step-by-step guide for migrating from the camelcase npm package to neo.case — 100% compatible API, additional case functions, tree-shaking benefits, and gotchas
-version: "0.1.0"
+version: "1.1.0"
 globs:
   - "**/*.ts"
   - "**/*.js"

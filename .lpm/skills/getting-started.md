@@ -1,7 +1,7 @@
 ---
 name: getting-started
 description: How to import and use neo.case — 10 case conversion functions, split/transform utilities, CaseInput types, tree-shaking, and choosing the right case
-version: "0.1.0"
+version: "1.1.0"
 globs:
   - "**/*.ts"
   - "**/*.js"

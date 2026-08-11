@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-12
+
 ### Fixed
 
 - Implemented `preserveConsecutiveUppercase` and `capitalizeAfterNumber` with `camelcase@9` behavior
@@ -17,14 +19,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - Prevented algorithmic-complexity denial of service on long all-uppercase input
 - Upgraded and locked the development toolchain with zero known audit findings
-- Pinned reviewed dependency install scripts and added automated dependency audits
+- Blocked dependency install scripts by default and added automated dependency audits
 - Documented that `pathCase()` is not a filesystem-path sanitizer
 
 ### Tooling
 
 - Added enforced V8 coverage thresholds and a `test:coverage` command
 - Added CI for clean installs, audits, typechecking, coverage, builds, and Node.js 18 runtime smoke tests
-- Added Dependabot updates for npm and GitHub Actions dependencies
+- Added Dependabot updates for GitHub Actions dependencies
 
 ### Performance
 

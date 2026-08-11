@@ -1,6 +1,6 @@
 {
   "name": "@lpm.dev/neo.case",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Modern, comprehensive case conversion library - zero dependencies, TypeScript-first, tree-shakeable. Convert between camelCase, snake_case, kebab-case, and 7 more cases. 100% backward compatible with camelcase package.",
   "type": "module",
   "sideEffects": false,
@@ -28,9 +28,11 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "bench": "vitest bench --run",
-    "size": "npm run build --silent && node scripts/measure-bundle.mjs",
-    "audit": "npm audit --audit-level=low",
-    "check": "npm run typecheck && npm run test:coverage && npm run build"
+    "size": "lpm run build && node scripts/measure-bundle.mjs",
+    "audit": "lpm audit --level moderate --fail-on vuln",
+    "check": "lpm run typecheck && lpm run test:coverage && lpm run build",
+    "release:check": "lpm run check && lpm run audit && lpm run size && node test/runtime-smoke.mjs",
+    "prepublishOnly": "lpm run release:check"
   },
   "keywords": [
     "case",
@@ -79,7 +81,6 @@
   "overrides": {
     "esbuild": "0.28.1"
   },
-  "packageManager": "npm@11.17.0",
   "engines": {
     "node": ">=18"
   },
@@ -87,10 +88,6 @@
     "runtime": {
       "name": "node",
       "version": ">=20",
-      "onFail": "error"
-    },
-    "packageManager": {
-      "name": "npm",
       "onFail": "error"
     }
   },
