@@ -1,6 +1,6 @@
 ---
 name: migrate-from-camelcase
-description: Step-by-step guide for migrating from the camelcase npm package to neo.case — 100% compatible API, additional case functions, tree-shaking benefits, and gotchas
+description: Step-by-step guide for migrating from the camelcase npm package to neo.case — compatible API, additional case functions, tree-shaking benefits, and gotchas
 version: "1.1.0"
 globs:
   - "**/*.ts"
@@ -14,10 +14,10 @@ globs:
 | Aspect | camelcase | neo.case |
 |--------|-----------|----------|
 | Case functions | 2 (camelCase, pascalCase) | 10 (+ snakeCase, kebabCase, constantCase, dotCase, pathCase, sentenceCase, titleCase, trainCase) |
-| Full available API | ~0.91KB for camelCase | ~1.98KB for 10 cases plus utilities |
-| Bundle (camel only) | ~0.91KB gzipped | ~0.98KB gzipped |
+| Full available API | ~0.91 KB for camelCase | ~2.23 KB for 10 cases plus utilities |
+| Bundle (camel only) | ~0.91 KB gzipped | ~1.17 KB gzipped |
 | Dependencies | Zero | Zero |
-| API compatibility | — | 100% backward compatible |
+| API compatibility | — | Compatible inputs, options, and exports |
 | TypeScript | Native | Native |
 | Extra utilities | None | `split()`, `transform()` for custom cases |
 
@@ -33,9 +33,11 @@ import camelCase from '@lpm.dev/neo.case'
 
 The default export is compatible with `camelcase`. A named `camelCase` export is also available.
 
-## Step 2: All Existing Code Works As-Is
+## Step 2: Keep the Existing API
 
-neo.case is 100% backward compatible with camelcase@9. No code changes needed for:
+neo.case uses the `camelcase@9` inputs and options. Common migrations only require an import change.
+
+PascalCase output has two Unicode corrections. neo.case correctly capitalizes supplementary-plane letters and initial combining sequences.
 
 ### Basic conversion
 
@@ -106,7 +108,7 @@ const name = pascalCase('foo-bar')
 
 ## Option Compatibility
 
-All `camelcase@9` options are implemented with matching behavior:
+neo.case implements all `camelcase@9` options. The common option behavior matches, apart from the two PascalCase Unicode corrections described above.
 
 ```typescript
 camelCase('foo-BAR', { preserveConsecutiveUppercase: true })

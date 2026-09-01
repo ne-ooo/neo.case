@@ -44,7 +44,7 @@ Correct:
 const result = camelCase(input)
 ```
 
-Each function handles its documented input formats directly. The general splitter recognizes camelCase, PascalCase, snake_case, kebab-case, dot.case, path/case, CONSTANT_CASE, spaces, and mixed separators. `camelCase` follows `camelcase@9` exactly and therefore preserves `/`. Chaining does double work and can introduce subtle bugs with edge cases like acronyms or leading special characters.
+Each function handles its documented input formats directly. The general splitter recognizes camelCase, PascalCase, snake_case, kebab-case, dot.case, path/case, CONSTANT_CASE, spaces, and mixed separators. `camelCase` follows the `camelcase@9` separator rules and therefore preserves `/`. Chaining does double work and can introduce subtle bugs with edge cases like acronyms or leading special characters.
 
 Source: `src/core/split.ts` — unified splitter handles all formats
 

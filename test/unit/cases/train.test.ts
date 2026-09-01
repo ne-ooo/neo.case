@@ -33,4 +33,8 @@ describe('trainCase', () => {
   it('should handle multiple words', () => {
     expect(trainCase('foo-bar-baz')).toBe('Foo-Bar-Baz')
   })
+
+  it('should apply contextual Unicode lowercase mappings', () => {
+    expect(trainCase('ΟΣ')).toBe('Ος')
+  })
 })

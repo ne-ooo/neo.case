@@ -144,7 +144,7 @@ transform(['foo', 'bar'], {
 | `case` | `'lower'`, `'upper'`, `'capital'`, `'preserve'` | Case applied to each word |
 | `separator` | Any string | Character(s) between words |
 | `capitalizeFirst` | `boolean` | Capitalize first word only |
-| `capitalizeAll` | `boolean` | Capitalize all words |
+| `capitalizeAll` | `boolean` | Capitalize every word after the first |
 | `locale` | `string`, `string[]`, `false` | Locale for case conversion |
 
 ## Number Handling

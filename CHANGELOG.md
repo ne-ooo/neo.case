@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Added separate TypeScript declarations for ESM and CommonJS package resolution
+- Corrected supplementary-plane and combining-sequence capitalization, combining-mark boundaries, titlecase boundaries, and contextual Unicode casing
+- Made every case function trim array elements and remove empty array elements
+- Corrected the public description of `capitalizeAll`
+
+### Security
+
+- Removed quadratic boundary insertion from alternating-case `camelCase` and `pascalCase` inputs
+- Added checksum verification for the LPM installer in the OIDC publish job
+- Limited published LPM files to the three package skills
+
+### Performance
+
+- Classified each Unicode code point once in the common `split()` path
+- Added alternating-case and long-Unicode benchmark coverage
+
 ## [1.1.0] - 2026-08-12
 
 ### Fixed
@@ -34,7 +52,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - Reworked word transformation to avoid callback and intermediate-array allocations
 - Cached camelCase normalization and removed redundant PascalCase options copying
 - Added representative ASCII, Unicode, acronym, number, and long-input benchmarks
-- Added a reproducible `npm run size` bundle-measurement command
+- Added a reproducible `lpm run size` bundle-measurement command
 - Updated benchmark and bundle-size documentation with reproducible current measurements
 
 ## [0.1.0] - 2026-03-09

@@ -1,224 +1,233 @@
 # @lpm.dev/neo.case
 
-> Modern, comprehensive case conversion library - zero dependencies, TypeScript-first, tree-shakeable
-
-Convert between camelCase, snake_case, kebab-case, and 7 more cases. **100% backward compatible** with the popular [camelcase](https://github.com/sindresorhus/camelcase) package (90M+ downloads/week).
+`@lpm.dev/neo.case` converts text between ten naming conventions in Node.js and
+modern browsers.
 
 ## Features
 
-✅ **10 case types** - camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, dot.case, path/case, Sentence case, Title Case, Train-Case
-✅ **Zero dependencies** - No external runtime dependencies
-✅ **Tree-shakeable** - Import only what you need (~2.0 KB gzipped for all cases, ~1.0 KB for one case)
-✅ **TypeScript-first** - Built with TypeScript, full type safety
-✅ **100% backward compatible** - Drop-in replacement for `camelcase` package
-✅ **Fast** - 4-6M ops/sec for common generalized conversions and up to 4.3M ops/sec for camelCase
-✅ **Unicode support** - Handles international characters
-✅ **Modern** - ESM + CJS, Node.js 18+, modern browsers
+- **Case conversion:** Supports camel, Pascal, snake, kebab, constant, dot,
+  path, sentence, title, and train cases.
+- **Compatibility:** Supports the common `camelcase` inputs and options.
+- **Unicode:** Converts international characters and locale-sensitive case
+  mappings.
+- **TypeScript support:** Includes strict type declarations.
+- **Module formats:** Provides tree-shakeable ESM and CommonJS builds.
+- **Dependency surface:** Has no runtime dependencies.
 
 ## Install
+
+Install the package with LPM:
 
 ```bash
 lpm install @lpm.dev/neo.case
 ```
 
-## Usage
+## Quick start
 
-### Basic Usage
+### Basic conversion
 
 ```typescript
-import { camelCase, snakeCase, kebabCase } from "@lpm.dev/neo.case";
+import { camelCase, kebabCase, snakeCase } from "@lpm.dev/neo.case";
 
-camelCase("foo-bar"); // 'fooBar'
-snakeCase("fooBar"); // 'foo_bar'
-kebabCase("FooBar"); // 'foo-bar'
+camelCase("foo-bar"); // "fooBar"
+snakeCase("fooBar"); // "foo_bar"
+kebabCase("FooBar"); // "foo-bar"
 ```
 
-### All Case Types
+### All case types
 
 ```typescript
 import {
   camelCase,
-  pascalCase,
-  snakeCase,
-  kebabCase,
   constantCase,
   dotCase,
+  kebabCase,
+  pascalCase,
   pathCase,
   sentenceCase,
+  snakeCase,
   titleCase,
   trainCase,
 } from "@lpm.dev/neo.case";
 
 const input = "foo-bar-baz";
 
-camelCase(input); // 'fooBarBaz'
-pascalCase(input); // 'FooBarBaz'
-snakeCase(input); // 'foo_bar_baz'
-kebabCase(input); // 'foo-bar-baz'
-constantCase(input); // 'FOO_BAR_BAZ'
-dotCase(input); // 'foo.bar.baz'
-pathCase(input); // 'foo/bar/baz'
-sentenceCase(input); // 'Foo bar baz'
-titleCase(input); // 'Foo Bar Baz'
-trainCase(input); // 'Foo-Bar-Baz'
+camelCase(input); // "fooBarBaz"
+pascalCase(input); // "FooBarBaz"
+snakeCase(input); // "foo_bar_baz"
+kebabCase(input); // "foo-bar-baz"
+constantCase(input); // "FOO_BAR_BAZ"
+dotCase(input); // "foo.bar.baz"
+pathCase(input); // "foo/bar/baz"
+sentenceCase(input); // "Foo bar baz"
+titleCase(input); // "Foo Bar Baz"
+trainCase(input); // "Foo-Bar-Baz"
 ```
 
-### Backward Compatible with `camelcase`
+### `camelcase`-compatible calls
 
 ```typescript
 import { camelCase } from "@lpm.dev/neo.case";
 
-// All camelcase package features work identically
-camelCase("foo-bar"); // 'fooBar'
-camelCase("foo_bar"); // 'fooBar'
-camelCase(["foo", "bar"]); // 'fooBar'
-camelCase("foo-bar", { pascalCase: true }); // 'FooBar'
-camelCase("розовый_пушистый"); // 'розовыйПушистый'
+// The camelcase package API works with the same inputs and options
+camelCase("foo-bar"); // "fooBar"
+camelCase("foo_bar"); // "fooBar"
+camelCase(["foo", "bar"]); // "fooBar"
+camelCase("foo-bar", { pascalCase: true }); // "FooBar"
+camelCase("розовый_пушистый"); // "розовыйПушистый"
 ```
 
-### Tree-Shaking
+### Tree-shaking
 
-Import only what you need for minimal bundle size:
+Import only the functions that the application uses:
 
 ```typescript
-// Import single case (~1.0 KB gzipped)
+// Import single case (~1.17 KB gzipped)
 import { camelCase } from "@lpm.dev/neo.case";
 
-// Import camel + snake + kebab (~1.76 KB gzipped)
-import { camelCase, snakeCase, kebabCase } from "@lpm.dev/neo.case";
+// Import camel + snake + kebab (~2.02 KB gzipped)
+import { camelCase, kebabCase, snakeCase } from "@lpm.dev/neo.case";
 
-// Import all cases (~2.0 KB gzipped)
+// Import all cases (~2.23 KB gzipped)
 import * as cases from "@lpm.dev/neo.case";
 ```
 
 ## API
 
-### Case Conversion Functions
+### Case conversion functions
 
 #### `camelCase(input, options?)`
 
-Convert to camelCase
+Converts the input to camel case.
 
 ```typescript
-camelCase("foo-bar"); // 'fooBar'
-camelCase("foo_bar"); // 'fooBar'
-camelCase("FooBar"); // 'fooBar'
-camelCase(["foo", "bar"]); // 'fooBar'
+camelCase("foo-bar"); // "fooBar"
+camelCase("foo_bar"); // "fooBar"
+camelCase("FooBar"); // "fooBar"
+camelCase(["foo", "bar"]); // "fooBar"
 
-// Options (backward compatible with camelcase package)
-camelCase("foo-bar", { pascalCase: true }); // 'FooBar'
-camelCase("foo-BAR", { preserveConsecutiveUppercase: true }); // 'fooBAR'
-camelCase("lorem-ipsum", { locale: "tr-TR" }); // 'loremİpsum'
+// Options (API-compatible with the camelcase package)
+camelCase("foo-bar", { pascalCase: true }); // "FooBar"
+camelCase("foo-BAR", { preserveConsecutiveUppercase: true }); // "fooBAR"
+camelCase("lorem-ipsum", { locale: "tr-TR" }); // "loremİpsum"
 ```
 
 **Options:**
 
 - `pascalCase?: boolean` - Uppercase the first character (default: `false`)
-- `preserveConsecutiveUppercase?: boolean` - Preserve consecutive uppercase letters (default: `false`)
-- `capitalizeAfterNumber?: boolean` - Capitalize letters after numbers (default: `true`)
-- `locale?: string | string[] | false` - Locale for case conversion (default: host environment locale)
+- `preserveConsecutiveUppercase?: boolean` - Preserve consecutive uppercase
+  letters (default: `false`)
+- `capitalizeAfterNumber?: boolean` - Capitalize letters after numbers (default:
+  `true`)
+- `locale?: string | string[] | false` - Locale for case conversion (default:
+  host environment locale)
 
 #### `pascalCase(input, options?)`
 
-Convert to PascalCase. Alias for `camelCase` with `pascalCase: true`.
+Converts the input to Pascal case. This function calls `camelCase` with
+`pascalCase: true`.
 
 ```typescript
-pascalCase("foo-bar"); // 'FooBar'
-pascalCase("fooBar"); // 'FooBar'
+pascalCase("foo-bar"); // "FooBar"
+pascalCase("fooBar"); // "FooBar"
 ```
 
 #### `snakeCase(input)`
 
-Convert to snake_case
+Converts the input to snake case.
 
 ```typescript
-snakeCase("fooBar"); // 'foo_bar'
-snakeCase("FooBar"); // 'foo_bar'
+snakeCase("fooBar"); // "foo_bar"
+snakeCase("FooBar"); // "foo_bar"
 ```
 
 #### `kebabCase(input)`
 
-Convert to kebab-case
+Converts the input to kebab case.
 
 ```typescript
-kebabCase("fooBar"); // 'foo-bar'
-kebabCase("FooBar"); // 'foo-bar'
+kebabCase("fooBar"); // "foo-bar"
+kebabCase("FooBar"); // "foo-bar"
 ```
 
 #### `constantCase(input)`
 
-Convert to CONSTANT_CASE
+Converts the input to constant case.
 
 ```typescript
-constantCase("fooBar"); // 'FOO_BAR'
-constantCase("foo-bar"); // 'FOO_BAR'
+constantCase("fooBar"); // "FOO_BAR"
+constantCase("foo-bar"); // "FOO_BAR"
 ```
 
 #### `dotCase(input)`
 
-Convert to dot.case
+Converts the input to dot case.
 
 ```typescript
-dotCase("fooBar"); // 'foo.bar'
-dotCase("foo-bar"); // 'foo.bar'
+dotCase("fooBar"); // "foo.bar"
+dotCase("foo-bar"); // "foo.bar"
 ```
 
 #### `pathCase(input)`
 
-Convert to path/case
+Converts the input to path case.
 
 ```typescript
-pathCase("fooBar"); // 'foo/bar'
-pathCase("foo-bar"); // 'foo/bar'
+pathCase("fooBar"); // "foo/bar"
+pathCase("foo-bar"); // "foo/bar"
 ```
 
-> **Security:** `pathCase()` formats trusted identifiers; it does not sanitize or validate filesystem paths. Do not use its output as a security boundary for user-controlled paths. Backslashes, drive prefixes, UNC paths, and other platform-specific path syntax may be preserved.
+`pathCase()` formats trusted identifiers. It does not sanitize or validate
+file-system paths.
+
+Do not use its output as a security boundary for user-controlled paths. The
+output can preserve platform-specific path syntax.
 
 #### `sentenceCase(input)`
 
-Convert to Sentence case
+Converts the input to sentence case.
 
 ```typescript
-sentenceCase("fooBar"); // 'Foo bar'
-sentenceCase("foo-bar"); // 'Foo bar'
+sentenceCase("fooBar"); // "Foo bar"
+sentenceCase("foo-bar"); // "Foo bar"
 ```
 
 #### `titleCase(input)`
 
-Convert to Title Case
+Converts the input to title case.
 
 ```typescript
-titleCase("fooBar"); // 'Foo Bar'
-titleCase("foo-bar"); // 'Foo Bar'
+titleCase("fooBar"); // "Foo Bar"
+titleCase("foo-bar"); // "Foo Bar"
 ```
 
 #### `trainCase(input)`
 
-Convert to Train-Case
+Converts the input to train case.
 
 ```typescript
-trainCase("fooBar"); // 'Foo-Bar'
-trainCase("foo-bar"); // 'Foo-Bar'
+trainCase("fooBar"); // "Foo-Bar"
+trainCase("foo-bar"); // "Foo-Bar"
 ```
 
 ### Advanced API
 
 #### `split(input: string): string[]`
 
-Split a string into words
+Splits a string into words.
 
 ```typescript
 import { split } from "@lpm.dev/neo.case";
 
-split("fooBar"); // ['foo', 'Bar']
-split("foo-bar"); // ['foo', 'bar']
-split("FOO_BAR"); // ['FOO', 'BAR']
-split("foo2Bar"); // ['foo', '2', 'Bar']
+split("fooBar"); // ["foo", "Bar"]
+split("foo-bar"); // ["foo", "bar"]
+split("FOO_BAR"); // ["FOO", "BAR"]
+split("foo2Bar"); // ["foo", "2", "Bar"]
 ```
 
 #### `transform(words: string[], options: TransformOptions): string`
 
-Transform an array of words with custom options
+Transforms an array of words with the specified options.
 
 ```typescript
 import { transform } from "@lpm.dev/neo.case";
@@ -226,73 +235,81 @@ import { transform } from "@lpm.dev/neo.case";
 transform(["foo", "bar"], {
   case: "lower",
   separator: "-",
-}); // 'foo-bar'
+}); // "foo-bar"
 
 transform(["foo", "bar"], {
   case: "capital",
   separator: " ",
-}); // 'Foo Bar'
+}); // "Foo Bar"
 ```
+
+`capitalizeAll` capitalizes every word after the first. Use `capitalizeFirst` to
+capitalize the first word.
 
 ## Migration from `camelcase`
 
-`@lpm.dev/neo.case` is 100% backward compatible with the `camelcase` package. Simply replace the import:
+`@lpm.dev/neo.case` supports the common `camelcase` API. It also provides nine
+additional case functions.
 
 ```diff
 - import camelCase from 'camelcase'
 + import camelCase from '@lpm.dev/neo.case'
 
-// All existing code works identically
+// Existing code uses the same API
 camelCase('foo-bar')  // 'fooBar'
 ```
 
-`camelCase` is also available as a named export alongside the additional case functions.
+PascalCase has two Unicode corrections from `camelcase@9`. It capitalizes
+supplementary-plane letters and initial combining sequences correctly.
 
-**Benefits of switching:**
+`camelCase` is also available as a named export alongside the additional case
+functions.
 
-- ✅ **Same API** - Zero code changes needed
-- ✅ **More cases** - Get 9 additional case types for free
-- ✅ **Tree-shakeable bundle** - Include only the case functions you use
-- ✅ **TypeScript** - Native TypeScript types (no @types package needed)
+Run the application tests after the migration. Pascal case has two Unicode
+behavior differences from `camelcase@9`.
 
 ## Performance
 
-Benchmarks vs `camelcase` package (higher is better):
+The repository contains reproducible benchmarks for case conversion.
 
-| Operation                              | neo.case    | camelcase@9 | Comparison          |
-| -------------------------------------- | ----------- | ----------- | ------------------- |
-| `camelCase('foo-bar')`                 | 4.31M ops/s | 3.26M ops/s | **1.32x faster** ✅ |
-| `camelCase('FooBar')`                  | 2.07M ops/s | 1.83M ops/s | **1.13x faster** ✅ |
-| Consecutive uppercase                  | 2.10M ops/s | 1.86M ops/s | **1.13x faster** ✅ |
-| Numbers                                | 1.80M ops/s | 1.60M ops/s | **1.13x faster** ✅ |
-| Array input                            | 2.72M ops/s | 2.28M ops/s | **1.19x faster** ✅ |
+| Operation              | neo.case    | camelcase@9 | Comparison   |
+| ---------------------- | ----------- | ----------- | ------------ |
+| `camelCase("foo-bar")` | 4.05M ops/s | 3.19M ops/s | 1.27x faster |
+| `camelCase('FooBar')`  | 1.74M ops/s | 1.73M ops/s | Parity       |
+| Consecutive uppercase  | 1.96M ops/s | 1.71M ops/s | 1.15x faster |
+| Numbers                | 1.47M ops/s | 1.46M ops/s | Parity       |
+| Array input            | 2.60M ops/s | 2.17M ops/s | 1.20x faster |
 
-Common snake, kebab, dot, path, and related conversions run at approximately **4.3-6.2M ops/sec**. Run `npm run bench` to reproduce the full suite; see [BENCHMARKS.md](./BENCHMARKS.md) for methodology and long/Unicode workloads.
+Common snake, kebab, dot, path, and related conversions run at approximately
+**4.0-6.3M ops/sec**. Run `lpm run bench` to reproduce the full suite. See
+[BENCHMARKS.md](./BENCHMARKS.md) for the method and long-input workloads.
 
-## Bundle Size
+### Bundle size
 
 | Import                              | Size (gzipped) |
 | ----------------------------------- | -------------- |
-| Full package (all exports)          | ~1.98 KB       |
-| Single case (camel or snake)        | ~0.98-1.02 KB  |
-| Three cases (camel + snake + kebab) | ~1.76 KB       |
+| Full package (all exports)          | ~2.23 KB       |
+| Single case (camel or snake)        | ~1.17-1.25 KB  |
+| Three cases (camel + snake + kebab) | ~2.02 KB       |
 
 **Comparison:**
 
 - `camelcase@9` camel-only bundle: ~0.91 KB gzipped
-- `@lpm.dev/neo.case` camel-only bundle: ~0.98 KB gzipped
-- `@lpm.dev/neo.case` full bundle: ~1.98 KB gzipped for all exports
+- `@lpm.dev/neo.case` camel-only bundle: ~1.17 KB gzipped
+- `@lpm.dev/neo.case` full bundle: ~2.23 KB gzipped for all exports
 
-Measured with esbuild 0.28.1 using browser ESM bundling, minification, tree-shaking, and gzip. Run `npm run size` to reproduce the table. Small changes in bundler or call-site code can change exact output.
+Measured with esbuild 0.28.1 using browser ESM bundling, minification,
+tree-shaking, and gzip. Run `lpm run size` to reproduce the table. Bundler and
+call-site changes can change the output.
 
-## Requirements
+## Runtime support
 
-- Node.js >= 18
-- Modern browsers (ES2022+)
+- **Node.js:** 18 or later
+- **Browsers:** Modern browsers with ES2022 support
+- **Module formats:** ESM and CommonJS
+- **TypeScript:** Declaration files included
 
-Contributors need Node.js >= 20 and npm 11.17.0 for the locked test/build toolchain. Published runtime support remains Node.js >= 18.
-
-## TypeScript
+### TypeScript example
 
 Full TypeScript support with strict types:
 
@@ -309,4 +326,4 @@ const result: string = camelCase("foo-bar", options);
 
 ## License
 
-MIT
+MIT. See [LICENSE](./LICENSE).

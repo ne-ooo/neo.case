@@ -1,5 +1,5 @@
 /**
- * Case conversion options (backward compatible with camelcase package)
+ * Case conversion options (API-compatible with the camelcase package)
  */
 export interface CaseOptions {
   /**
@@ -55,7 +55,7 @@ export interface TransformOptions {
   capitalizeFirst?: boolean
 
   /**
-   * Capitalize all words
+   * Capitalize every word after the first
    * @default false
    */
   capitalizeAll?: boolean

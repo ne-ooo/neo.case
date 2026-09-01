@@ -1,14 +1,19 @@
 {
   "name": "@lpm.dev/neo.case",
   "version": "1.1.0",
-  "description": "Modern, comprehensive case conversion library - zero dependencies, TypeScript-first, tree-shakeable. Convert between camelCase, snake_case, kebab-case, and 7 more cases. 100% backward compatible with camelcase package.",
+  "description": "Modern, comprehensive case conversion library - zero dependencies, TypeScript-first, tree-shakeable. Convert between camelCase, snake_case, kebab-case, and 7 more cases. API-compatible with the camelcase package.",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "main": "./dist/index.cjs",
@@ -16,7 +21,7 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    ".lpm",
+    ".lpm/skills",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -24,13 +29,14 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.types.json",
+    "typecheck:package": "tsc -p test/types/commonjs-consumer/tsconfig.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "bench": "vitest bench --run",
     "size": "lpm run build && node scripts/measure-bundle.mjs",
     "audit": "lpm audit --level moderate --fail-on vuln",
-    "check": "lpm run typecheck && lpm run test:coverage && lpm run build",
+    "check": "lpm run typecheck && lpm run test:coverage && lpm run build && lpm run typecheck:package",
     "release:check": "lpm run check && lpm run audit && lpm run size && node test/runtime-smoke.mjs",
     "prepublishOnly": "lpm run release:check"
   },

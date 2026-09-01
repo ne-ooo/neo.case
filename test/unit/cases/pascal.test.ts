@@ -33,4 +33,12 @@ describe('pascalCase', () => {
   it('should preserve leading special characters', () => {
     expect(pascalCase('_foo-bar')).toBe('_FooBar')
   })
+
+  it('should capitalize supplementary-plane Unicode letters', () => {
+    expect(pascalCase('𐐨word')).toBe('𐐀word')
+  })
+
+  it('should capitalize an initial base with its combining marks', () => {
+    expect(pascalCase('i\u0307\u0300', { locale: 'lt' })).toBe('I\u0300')
+  })
 })

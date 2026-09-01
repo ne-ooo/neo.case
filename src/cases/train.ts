@@ -1,5 +1,6 @@
 import { split } from '../core/split.js'
 import { transform } from '../core/transform.js'
+import { normalizeCaseInput } from '../core/normalize.js'
 import type { CaseInput } from '../types.js'
 
 /**
@@ -14,7 +15,7 @@ import type { CaseInput } from '../types.js'
  * trainCase(['foo', 'bar'])   // 'Foo-Bar'
  */
 export function trainCase(input: CaseInput): string {
-  const str = typeof input === 'string' ? input : input.join('-')
+  const str = normalizeCaseInput(input)
 
   if (!str || str.length === 0) {
     return ''

@@ -27,6 +27,19 @@ describe('split', () => {
       expect(split('БыстрыйТест')).toEqual(['Быстрый', 'Тест'])
       expect(split('αΒeta')).toEqual(['α', 'Βeta'])
     })
+
+    it('should treat combining marks as part of the preceding letter', () => {
+      expect(split('a\u0301Bar')).toEqual(['a\u0301', 'Bar'])
+      expect(split('XMLH\u0301ttpRequest')).toEqual([
+        'XML',
+        'H\u0301ttp',
+        'Request',
+      ])
+    })
+
+    it('should treat Unicode titlecase letters as uppercase boundaries', () => {
+      expect(split('fooǅbar')).toEqual(['foo', 'ǅbar'])
+    })
   })
 
   describe('snake_case, kebab-case, and separators', () => {
@@ -126,6 +139,15 @@ describe('split', () => {
 
       expect(split(input)).toEqual([input])
       expect(performance.now() - start).toBeLessThan(250)
+    })
+
+    it('should process long combining-mark runs in linear time', () => {
+      const marks = '\u0301'.repeat(16_000)
+      const input = `a${marks}B`
+      const start = performance.now()
+
+      expect(split(input)).toEqual([`a${marks}`, 'B'])
+      expect(performance.now() - start).toBeLessThan(500)
     })
   })
 })

@@ -1,4 +1,5 @@
 import type { TransformOptions } from '../types.js'
+import { getInitialCharacterSequence } from './unicode.js'
 
 type Locale = string | string[] | false | undefined
 
@@ -12,6 +13,29 @@ function toUpperCase(input: string, locale: Locale): string {
   return locale === false
     ? input.toUpperCase()
     : input.toLocaleUpperCase(locale)
+}
+
+function capitalize(input: string, locale: Locale, lowercaseRest: boolean): string {
+  const initialSequence = getInitialCharacterSequence(input)
+  let rest = input.slice(initialSequence.length)
+
+  if (lowercaseRest) {
+    const lowercased = toLowerCase(input, locale)
+    const hasAsciiInitial = initialSequence.length === 1
+      && initialSequence.charCodeAt(0) <= 0x7F
+
+    if (hasAsciiInitial) {
+      rest = lowercased.slice(1)
+    } else {
+      const lowercasedInitial = toLowerCase(initialSequence, locale)
+      rest = lowercased.startsWith(lowercasedInitial)
+        ? lowercased.slice(lowercasedInitial.length)
+        : toLowerCase(rest, locale)
+    }
+  }
+
+  return toUpperCase(initialSequence, locale)
+    + rest
 }
 
 /**
@@ -47,19 +71,16 @@ export function transform(
           transformed = toUpperCase(word, locale)
           break
         case 'capital':
-          transformed = toUpperCase(word.charAt(0), locale)
-            + toLowerCase(word.slice(1), locale)
+          transformed = capitalize(word, locale, true)
           break
         case 'preserve':
           break
       }
 
       if (index === 0 && capitalizeFirst) {
-        transformed = toUpperCase(transformed.charAt(0), locale)
-          + transformed.slice(1)
+        transformed = capitalize(transformed, locale, false)
       } else if (index > 0 && capitalizeAll) {
-        transformed = toUpperCase(transformed.charAt(0), locale)
-          + transformed.slice(1)
+        transformed = capitalize(transformed, locale, false)
       }
     }
 

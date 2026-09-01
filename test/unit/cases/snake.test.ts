@@ -37,4 +37,12 @@ describe('snakeCase', () => {
   it('should handle consecutive uppercase', () => {
     expect(snakeCase('FOOBar')).toBe('foo_bar')
   })
+
+  it('should preserve boundaries after combining marks', () => {
+    expect(snakeCase('a\u0301Bar')).toBe('a\u0301_bar')
+  })
+
+  it('should split before Unicode titlecase letters', () => {
+    expect(snakeCase('fooǅbar')).toBe('foo_ǆbar')
+  })
 })

@@ -15,6 +15,7 @@ concurrency:
 
 env:
   LPM_VERSION: "0.74.1"
+  LPM_INSTALLER_SHA256: "82776d71eac5201349617303a960b88f0f1d2d249fe07c758d3b1162e362434f"
 
 jobs:
   publish:
@@ -31,7 +32,14 @@ jobs:
           node-version: "24.11.0"
 
       - name: Install LPM
-        run: npm install --global "@lpm-registry/cli@${LPM_VERSION}"
+        env:
+          LPM_INSTALL_VERSION: v${{ env.LPM_VERSION }}
+        run: |
+          curl --fail --silent --show-error --location "https://raw.githubusercontent.com/lpm-dev/rust-client/v${LPM_VERSION}/install.sh" --output "$RUNNER_TEMP/install-lpm.sh"
+          echo "${LPM_INSTALLER_SHA256}  $RUNNER_TEMP/install-lpm.sh" | sha256sum --check --strict
+          sh "$RUNNER_TEMP/install-lpm.sh"
+          echo "$HOME/.lpm/bin" >> "$GITHUB_PATH"
+          "$HOME/.lpm/bin/lpm" --version
 
       - name: Install locked dependencies
         run: >-

@@ -37,4 +37,8 @@ describe('titleCase', () => {
   it('should handle lowercase words', () => {
     expect(titleCase('foo bar baz')).toBe('Foo Bar Baz')
   })
+
+  it('should apply contextual Unicode lowercase mappings', () => {
+    expect(titleCase('ΟΣ')).toBe('Ος')
+  })
 })

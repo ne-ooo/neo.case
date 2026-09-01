@@ -139,6 +139,14 @@ describe('camelCase', () => {
       expect(camelCase('foo_-bar.baz')).toBe('fooBarBaz')
     })
 
+    it('should process long alternating-case input in linear time', () => {
+      const input = 'aA'.repeat(64_000)
+      const start = performance.now()
+
+      expect(camelCase(input)).toBe(input)
+      expect(performance.now() - start).toBeLessThan(1_000)
+    })
+
     it('should return leading special chars for only special chars', () => {
       expect(camelCase('___')).toBe('___')
     })
@@ -153,6 +161,17 @@ describe('camelCase', () => {
       expect(camelCase('fooÄBar')).toBe('fooÄbar')
       expect(camelCase('БыстрыйТест')).toBe('быстрыйТест')
       expect(camelCase('αΒeta')).toBe('αΒeta')
+    })
+
+    it('should capitalize supplementary-plane Unicode letters', () => {
+      expect(camelCase('𐐨word', { pascalCase: true })).toBe('𐐀word')
+    })
+
+    it('should capitalize an initial base with its combining marks', () => {
+      expect(camelCase('i\u0307\u0300', {
+        pascalCase: true,
+        locale: 'lt',
+      })).toBe('I\u0300')
     })
   })
 })

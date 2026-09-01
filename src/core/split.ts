@@ -3,11 +3,13 @@ const UPPERCASE = 1 << 1
 const LOWERCASE = 1 << 2
 const NUMBER = 1 << 3
 const SEPARATOR = 1 << 4
+const MARK = 1 << 5
 
 const UNICODE_LETTER = /\p{L}/u
-const UNICODE_UPPERCASE = /\p{Lu}/u
+const UNICODE_UPPERCASE = /[\p{Lu}\p{Lt}]/u
 const UNICODE_LOWERCASE = /\p{Ll}/u
 const UNICODE_NUMBER = /\p{N}/u
+const UNICODE_MARK = /\p{M}/u
 
 function getCharacterWidth(input: string, index: number): number {
   const codeUnit = input.charCodeAt(index)
@@ -56,19 +58,29 @@ function getCharacterType(input: string, index: number): number {
   }
 
   const character = String.fromCodePoint(input.codePointAt(index)!)
-  let type = 0
 
   if (UNICODE_LETTER.test(character)) {
-    type |= LETTER
+    if (UNICODE_UPPERCASE.test(character)) {
+      return LETTER | UPPERCASE
+    }
+    if (UNICODE_LOWERCASE.test(character)) {
+      return LETTER | LOWERCASE
+    }
+
+    return LETTER
   }
-  if (UNICODE_UPPERCASE.test(character)) {
-    type |= UPPERCASE
-  }
-  if (UNICODE_LOWERCASE.test(character)) {
-    type |= LOWERCASE
-  }
+
   if (UNICODE_NUMBER.test(character)) {
-    type |= NUMBER
+    return NUMBER
+  }
+
+  return UNICODE_MARK.test(character) ? MARK : 0
+}
+
+function getNextBoundaryType(input: string, index: number, type: number): number {
+  while ((type & MARK) !== 0) {
+    index += getCharacterWidth(input, index)
+    type = getCharacterType(input, index)
   }
 
   return type
@@ -139,11 +151,11 @@ export function split(input: string): string[] {
   const words: string[] = []
   let wordStart = 0
   let previousType = 0
+  let currentType = getCharacterType(processed, 0)
 
   for (let index = 0; index < processed.length;) {
     const width = getCharacterWidth(processed, index)
     const nextIndex = index + width
-    const currentType = getCharacterType(processed, index)
 
     if ((currentType & SEPARATOR) !== 0) {
       if (wordStart < index) {
@@ -153,21 +165,30 @@ export function split(input: string): string[] {
       wordStart = nextIndex
       previousType = 0
       index = nextIndex
+      currentType = getCharacterType(processed, index)
       continue
     }
 
     const nextType = getCharacterType(processed, nextIndex)
+    const needsBoundaryLookahead = (previousType & UPPERCASE) !== 0
+      && (currentType & UPPERCASE) !== 0
+    const nextBoundaryType = needsBoundaryLookahead
+      ? getNextBoundaryType(processed, nextIndex, nextType)
+      : nextType
 
     if (
       wordStart < index
-      && isWordBoundary(previousType, currentType, nextType)
+      && isWordBoundary(previousType, currentType, nextBoundaryType)
     ) {
       words.push(processed.slice(wordStart, index))
       wordStart = index
     }
 
-    previousType = currentType
+    if ((currentType & MARK) === 0) {
+      previousType = currentType
+    }
     index = nextIndex
+    currentType = nextType
   }
 
   if (wordStart < processed.length) {

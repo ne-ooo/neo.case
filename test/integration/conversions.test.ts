@@ -83,6 +83,21 @@ describe('Array input conversions', () => {
     expect(titleCase(input)).toBe('Foo Bar Baz')
     expect(trainCase(input)).toBe('Foo-Bar-Baz')
   })
+
+  it('should trim array elements and remove empty elements', () => {
+    const input = ['\tfoo\t', '', '\u2003bar\u00a0']
+
+    expect(camelCase(input)).toBe('fooBar')
+    expect(pascalCase(input)).toBe('FooBar')
+    expect(snakeCase(input)).toBe('foo_bar')
+    expect(kebabCase(input)).toBe('foo-bar')
+    expect(constantCase(input)).toBe('FOO_BAR')
+    expect(dotCase(input)).toBe('foo.bar')
+    expect(pathCase(input)).toBe('foo/bar')
+    expect(sentenceCase(input)).toBe('Foo bar')
+    expect(titleCase(input)).toBe('Foo Bar')
+    expect(trainCase(input)).toBe('Foo-Bar')
+  })
 })
 
 describe('Special character handling', () => {

@@ -1,4 +1,6 @@
 import type { CaseInput, CaseOptions } from '../types.js'
+import { normalizeCaseInput } from '../core/normalize.js'
+import { getInitialCharacterSequence } from '../core/unicode.js'
 
 // Derived from camelcase@9 by Sindre Sorhus (MIT). See LICENSE.
 // This compatibility implementation is intentionally separate from the
@@ -28,31 +30,36 @@ function preserveCamelCase(
   toUpperCase: ChangeCase,
   preserveConsecutiveUppercase: boolean
 ): string {
-  let result = input
+  let result: string[] | undefined
   let isLastCharLower = false
   let isLastCharUpper = false
   let isLastLastCharUpper = false
   let isLastLastCharPreserved = false
 
-  for (let index = 0; index < result.length; index++) {
-    const character = result[index]!
+  for (let index = 0; index < input.length; index++) {
+    const character = input[index]!
 
     // Was the character three positions back an inserted separator?
-    isLastLastCharPreserved = index > 2 ? result[index - 3] === '-' : true
+    const outputLength = result?.length ?? index
+    isLastLastCharPreserved = outputLength > 2
+      ? (result?.[outputLength - 3] ?? input[index - 3]) === '-'
+      : true
 
     if (isLastCharLower && UPPERCASE.test(character)) {
-      result = `${result.slice(0, index)}-${result.slice(index)}`
+      result ??= input.slice(0, index).split('')
+      result.push('-')
       isLastCharLower = false
       isLastLastCharUpper = isLastCharUpper
       isLastCharUpper = true
-      index++
     } else if (
       isLastCharUpper
       && isLastLastCharUpper
       && LOWERCASE.test(character)
       && (!isLastLastCharPreserved || preserveConsecutiveUppercase)
     ) {
-      result = `${result.slice(0, index - 1)}-${result.slice(index - 1)}`
+      result ??= input.slice(0, index).split('')
+      const previousCharacter = result.pop()!
+      result.push('-', previousCharacter)
       isLastLastCharUpper = isLastCharUpper
       isLastCharUpper = false
       isLastCharLower = true
@@ -63,9 +70,11 @@ function preserveCamelCase(
       isLastCharUpper = toUpperCase(character) === character
         && toLowerCase(character) !== character
     }
+
+    result?.push(character)
   }
 
-  return result
+  return result?.join('') ?? input
 }
 
 function preserveLeadingConsecutiveUppercase(
@@ -149,7 +158,8 @@ function postProcess(
 /**
  * Convert a string or array of strings to camelCase.
  *
- * Behavior and options are compatible with camelcase@9.
+ * Behavior and options are compatible with camelcase@9, except that PascalCase
+ * output corrects supplementary-plane and combining-sequence capitalization.
  */
 export function camelCase(input: CaseInput, options: CaseOptions = {}): string {
   return convertCamelCase(input, options, false)
@@ -183,12 +193,7 @@ function convertCamelCase(
     normalizedOptions.pascalCase = true
   }
 
-  let value = Array.isArray(input)
-    ? input
-        .map(element => element.trim())
-        .filter(element => element.length > 0)
-        .join('-')
-    : input.trim()
+  let value = normalizeCaseInput(input).trim()
 
   if (value.length === 0) {
     return ''
@@ -261,7 +266,8 @@ function convertCamelCase(
   }
 
   if (normalizedOptions.pascalCase && value.length > 0) {
-    value = toUpperCase(value[0]!) + value.slice(1)
+    const initialSequence = getInitialCharacterSequence(value)
+    value = toUpperCase(initialSequence) + value.slice(initialSequence.length)
   }
 
   return leadingPrefix + postProcess(

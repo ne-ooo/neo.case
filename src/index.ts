@@ -2,7 +2,7 @@
  * @lpm.dev/neo.case - Modern, comprehensive case conversion library
  *
  * Zero dependencies, TypeScript-first, tree-shakeable
- * 100% backward compatible with camelcase package
+ * API-compatible with the camelcase package
  *
  * @example
  * ```typescript

@@ -89,7 +89,7 @@ describe('transform', () => {
       expect(result).toBe('Foo bar')
     })
 
-    it('should capitalize all words', () => {
+    it('should capitalize every word after the first', () => {
       const result = transform(['foo', 'bar', 'baz'], {
         case: 'lower',
         separator: '',
@@ -106,6 +106,49 @@ describe('transform', () => {
         capitalizeAll: true,
       })
       expect(result).toBe('FooBarBaz')
+    })
+
+    it('should capitalize supplementary-plane Unicode letters', () => {
+      expect(transform(['𐐨word'], {
+        case: 'capital',
+        separator: ' ',
+      })).toBe('𐐀word')
+      expect(transform(['𐐨word'], {
+        case: 'lower',
+        separator: ' ',
+        capitalizeFirst: true,
+      })).toBe('𐐀word')
+      expect(transform(['first', '𐐨word'], {
+        case: 'lower',
+        separator: '',
+        capitalizeAll: true,
+      })).toBe('first𐐀word')
+    })
+
+    it('should apply contextual lowercase mappings to capitalized words', () => {
+      expect(transform(['ΟΣ'], {
+        case: 'capital',
+        separator: ' ',
+      })).toBe('Ος')
+      expect(transform(['istanbul'], {
+        case: 'capital',
+        separator: ' ',
+        locale: 'tr',
+      })).toBe('İstanbul')
+    })
+
+    it('should capitalize an initial base with its combining marks', () => {
+      expect(transform(['Ì'], {
+        case: 'lower',
+        separator: '',
+        capitalizeFirst: true,
+        locale: 'lt',
+      })).toBe('I\u0300')
+      expect(transform(['i\u0307\u0300'], {
+        case: 'capital',
+        separator: '',
+        locale: 'lt',
+      })).toBe('I\u0300')
     })
   })
 

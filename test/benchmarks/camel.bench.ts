@@ -75,6 +75,7 @@ describe('camelCase Performance - Unicode and Options', () => {
 
 describe('camelCase Performance - Long Input', () => {
   const uppercaseInput = 'A'.repeat(4096)
+  const alternatingCaseInput = 'aA'.repeat(2048)
 
   bench('neo.case camelCase - 4 KiB uppercase', () => {
     neoCamelCase(uppercaseInput)
@@ -82,5 +83,13 @@ describe('camelCase Performance - Long Input', () => {
 
   bench('original camelCase - 4 KiB uppercase', () => {
     originalCamelCase(uppercaseInput)
+  })
+
+  bench('neo.case camelCase - 4 KiB alternating case', () => {
+    neoCamelCase(alternatingCaseInput)
+  })
+
+  bench('original camelCase - 4 KiB alternating case', () => {
+    originalCamelCase(alternatingCaseInput)
   })
 })

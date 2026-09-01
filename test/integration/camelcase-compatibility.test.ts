@@ -55,4 +55,9 @@ describe('camelcase@9 compatibility', () => {
     expect(callNeo).toThrow('Expected the input to be `string | string[]`')
     expect(callOriginal).toThrow('Expected the input to be `string | string[]`')
   })
+
+  it('corrects upstream supplementary-plane PascalCase capitalization', () => {
+    expect(camelCase('𐐨word', { pascalCase: true })).toBe('𐐀word')
+    expect(originalCamelCase('𐐨word', { pascalCase: true })).toBe('𐐨word')
+  })
 })

@@ -22,6 +22,8 @@ describe('split Performance - Representative Inputs', () => {
 describe('split Performance - Long Inputs', () => {
   const uppercase = 'A'.repeat(4096)
   const mixed = 'fooBar2XMLHttpRequest-'.repeat(128)
+  const unicode = 'БыстрыйТестÜberAllesΑλφαΒήτα'.repeat(128)
+  const combiningMarks = `a${'\u0301'.repeat(4096)}B`
 
   bench('4 KiB uppercase', () => {
     split(uppercase)
@@ -29,5 +31,13 @@ describe('split Performance - Long Inputs', () => {
 
   bench('3 KiB mixed boundaries', () => {
     split(mixed)
+  })
+
+  bench('3.5 KiB Unicode boundaries', () => {
+    split(unicode)
+  })
+
+  bench('4 KiB combining-mark run', () => {
+    split(combiningMarks)
   })
 })
